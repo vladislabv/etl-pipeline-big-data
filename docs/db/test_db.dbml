@@ -1,0 +1,61 @@
+// Use DBML to define your database structure
+// Docs: https://dbml.dbdiagram.io/docs
+
+Table gateways {
+  id integer [primary key]
+  ip4 varchar(15)
+  net_segment integer
+  online boolean
+  config_id integer
+}
+
+Table gateway_configs {
+  id integer [primary key]
+  api_timeout integer [note: 'Time in seconds']
+  max_allowed_clients integer
+  poll_interval integer
+  current_version varchar
+}
+
+Table tags {
+  id integer [primary key, note: 'May change or not?']
+  name text [note: 'Program name of a tag or dynamically assigned?']
+  ip6 varchar(39)
+  online boolean [default: 'true']
+  gateway_id integer
+}
+
+// Come up with a better table name
+// assumed measurements after recoeding are never updated
+Table measures {
+  id integer [primary key]
+  tag_id integer
+  created_at timestamp [note: 'Timestamp as integer, when a measure was recorded']
+  indexes {
+    created_at [name: 'created_at_index']
+  }
+}
+
+Table measure_types {
+  id integer
+  name text [unique, note: 'i.e., acc_<axis>, voltage, temperature']
+}
+
+Table measure_values {
+  id integer [primary key]
+  type_id integer
+  meta_id integer
+  value double [note: 'actual value of a measurement']
+}
+
+// Update config_id if config has changed
+// store configs in a separate table for deduping configs
+Ref: gateways.config_id < gateway_configs.id
+
+Ref: tags.gateway_id < gateways.id
+
+Ref: measures.tag_id < tags.id
+
+Ref: measure_values.type_id < measure_types.id
+
+Ref: measure_values.meta_id < measures.id
