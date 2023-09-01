@@ -1,0 +1,27 @@
+{
+  "$jsonSchema": {
+    "required": [ "_id", "name", "last_contact", "online", "config" ],
+    "properties": {
+      "_id": { "bsonType": "string", "minLength": 11, "maxLength": 17, "description": "unique MAC-address of the tag (bluetooth MAC)" },
+      "name": { "bsonType": "string", "minLength": 1, "description": "name of the tag that derives from the MAC-address" },
+      "last_contact": { "bsonType": "timestamp" },
+      "online": { "bsonType": "bool" },
+      "config": { 
+        "bsonType": "object",
+        "description": "Config object for the device",
+        "required": [ "divider", "dsp_function", "dsp_parameter", "mode", "resolution", "samplerate", "scale", "scan_interval" ],
+        "properties": {
+        "divider": { "bsonType": "int" },
+        "dsp_function": { "bsonType": "int" },
+        "dsp_parameter": { "bsonType": "int" },
+        "mode": { "bsonType": "int" },
+        "resolution": { "bsonType": "int" },
+        "samplerate": { "bsonType": "int" },
+        "scale": { "bsonType": "int" },
+        "scan_interval": { "bsonType": "int" }
+        }
+      }
+    },
+    "additionalProperties": false
+  }
+}

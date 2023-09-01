@@ -1,0 +1,31 @@
+{
+  "$jsonSchema": {
+    "required": [ "_id", "ip4", "net_segment", "last_contact", "online", "tags_assigned", "config" ],
+    "properties": {
+      "_id": { "bsonType": "string", "description": "Unique identifier for the gateway (like 31302e302e322e323432d41d8cd98f00b204e9800998ecf8427e)" },
+      "ip4": { "bsonType": "string", "minLength": 7, "maxLength": 15 },
+      "last_contact": { "bsonType": "timestamp" },
+      "net_segment": { "bsonType": "int" },
+      "online": { "bsonType": "bool" },
+      "tags_assigned": {
+        "bsonType": "array",
+        "description": "Array of tags (object ids) assigned to the device since last update. A gateway is allowed to have no tags assigned",
+        "minItems": 0,
+        "uniqueItems": true,
+        "items": { "bsonType": "string" }
+      },
+      "config": { 
+        "bsonType": "object",
+        "description": "Config object for the device",
+        "required": [ "version", "poll_interval", "max_allowed_clients", "api_timeout" ],
+        "properties": {
+          "version": { "bsonType": "string", "description": "Version of the device" },
+          "poll_interval": { "bsonType": "int", "description": "Poll interval in seconds" },
+          "max_allowed_clients": { "bsonType": "int", "description": "Max number of clients allowed to connect" },
+          "api_timeout": { "bsonType": "int", "description": "Timeout in seconds" }
+        }
+     }
+    },
+    "additionalProperties": false
+  }
+}

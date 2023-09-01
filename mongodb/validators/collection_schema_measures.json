@@ -1,0 +1,13 @@
+{
+  "$jsonSchema": {
+    "bsonType": "object",
+    "description": "Document describing a measurement recorded by a ruuvi tag. Additional fields are allowed and should be handled after import.",
+    "required": [ "_id", "tag_id", "recorded_time" ],
+    "properties": {
+      "_id": { "bsonType": "objectId" },
+      "tag_id": { "bsonType": "string", "minLength": 1, "maxLength": 17, "description": "unique MAC-address of the tag (bluetooth MAC)" },
+      "recorded_time": { "bsonType": "timestamp", "description": "time when the specific measurement was recorded" }
+    },
+    "additionalProperties": true
+  }
+}
