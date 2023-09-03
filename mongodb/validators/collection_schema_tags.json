@@ -4,7 +4,7 @@
     "properties": {
       "_id": { "bsonType": "string", "minLength": 11, "maxLength": 17, "description": "unique MAC-address of the tag (bluetooth MAC)" },
       "name": { "bsonType": "string", "minLength": 1, "description": "name of the tag that derives from the MAC-address" },
-      "last_contact": { "bsonType": "timestamp" },
+      "last_contact": { "bsonType": "date" },
       "online": { "bsonType": "bool" },
       "config": { 
         "bsonType": "object",
