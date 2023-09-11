@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from mongodb_env import load_env
 from bson.objectid import ObjectId
-from datetime import datetime
+from datetime import datetime, timedelta
 
 client = load_env()
 
@@ -130,9 +130,59 @@ def get_average_temperature_for_date(input_date):
     print(f"No data found for date: {input_date}")
 
 # Example usage:
-# Replace '2023-09-09' with the date you want to query.
 get_average_temperature_for_date('2023-09-09')
 get_average_temperature_for_date('2023-09-02')
 get_average_temperature_for_date('2023-09-01')
+
+
+
+# above code as a function that really only
+# calculates the temprature for the input date 
+def get_average_temperature_for_date_eff(input_date):
+    # Convert the input date to a datetime object
+    input_datetime = datetime.strptime(input_date, "%Y-%m-%d")
+
+    # Calculate the end of the day for input_date
+    end_of_day = input_datetime + timedelta(days=1)
+    
+    # Define the aggregation stages as strings
+    stage1 = {
+        "$match": {
+            "recorded_time": {
+                "$gte": input_datetime,   # Match records on or after the input date
+                "$lt": end_of_day        # Match records before the next day
+            }
+        }
+    }
+
+    stage2 = {
+        "$group": {
+            "_id": None,  # Group all matched records together
+            "average_temperature": {
+                "$avg": "$temperature"
+            }
+        }
+    }
+
+    # Construct the aggregation pipeline
+    pipeline = [stage1, stage2]
+
+    # Execute the aggregation query
+    results = list(measures_collection.aggregate(pipeline))
+
+    if results:
+        average_temperature = results[0]["average_temperature"]
+        print(f"Date: {input_date}, Average Temperature: {average_temperature:.2f}°C")
+    else:
+        # If no data is found for the input date
+        print(f"No data found for date: {input_date}")
+
+
+# Example usage:
+get_average_temperature_for_date_eff('2023-09-09')
+get_average_temperature_for_date_eff('2023-09-02')
+get_average_temperature_for_date_eff('2023-09-01')
+
+
 
 client.close()
