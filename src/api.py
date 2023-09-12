@@ -30,31 +30,37 @@ def get_tags(session, gateway_id):
 
 
 def stop_iteration(elem, stop_at):
-    return datetime.fromisoformat(elem['recorded_time']) < stop_at.replace(tzinfo=timezone.utc)
+   return datetime.strptime(elem['recorded_time'][:-4], "%Y-%m-%dT%H:%M:%S.%f").replace(tzinfo=timezone.utc) < stop_at.replace(tzinfo=timezone.utc)
 
 
 # Caution for really long measurements running this function will take a long time
 # by default only measures from 12 hours ago are returned
 def get_measurements(session, tag_ip6, stop_at=(datetime.now()-timedelta(hours=12)), start_page=1, paginate=True):
     r = session.get(f'{API}/acc-data/get/{tag_ip6}/{start_page}')
-    res = r.json()
-    if not 'measurements' in res.keys() or not int(res['size']):
-        print(f'No measurements for {tag_ip6}')
-        return
-    # yield found measurements
-    for measurement in res['measurements']:
-        if measurement:
-            yield measurement
+    if r.status_code == 200:
+        res = r.json()
+        if not 'measurements' in res.keys() or not int(res['size']):
+            print(f'No measurements for {tag_ip6}')
+            return
+        # yield found measurements
+        for measurement in res['measurements']:
+            if measurement:
+                yield measurement
 
-    if paginate:
-        # iterate over the measurements
-        while True:
-            start_page += 1
-            r = session.get(f'{API}/acc-data/get/{tag_ip6}/{start_page}')
-            res = r.json()
-            for measurement in res['measurements']:
-                if measurement and not stop_iteration(measurement, stop_at):
-                    yield measurement
+        if paginate:
+            # iterate over the measurements
+            nextTag = False
+            while not nextTag:
+                start_page += 1
+                r = session.get(f'{API}/acc-data/get/{tag_ip6}/{start_page}')
+                if r.status_code == 200:
+                    res = r.json()
+                    if res["page"] < res["next_page"]:
+                        for measurement in res['measurements']:
+                            if measurement and not stop_iteration(measurement, stop_at):
+                                yield measurement
+                    else:
+                        nextTag = True
 
 
 def get_configs(session: requests.Session, gateway_ids: list, obj: str = "gateway", tag_ip6s = None):
@@ -77,3 +83,16 @@ def get_configs(session: requests.Session, gateway_ids: list, obj: str = "gatewa
         for id in gateway_ids:
             r = session.get(f'{API}/config/get/{id}')
             yield r.json()['config']
+
+
+def get_configssing(session: requests.Session, gateway_id, tag_ipv6= ''):
+    if gateway_id == '':
+        raise ValueError('gateway_id cant be empty')
+
+    if tag_ipv6 == '':
+        r = session.get(f'{API}/config/get/{gateway_id}')
+        return r.json()['config']  
+    else:
+        r = session.get(f'{API}/config/get/{gateway_id}/{tag_ipv6}')
+        return r.json()['config']
+        
