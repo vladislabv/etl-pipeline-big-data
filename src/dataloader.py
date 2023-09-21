@@ -63,8 +63,9 @@ with requests.Session() as s:
 
                 for measurement in get_measurements(s, tag['_id']):
                     numbermeasurements += 1
-
+                    measurement['recorded_time'] = datetime.strptime(measurement['recorded_time'][:-4], "%Y-%m-%dT%H:%M:%S.%f").replace(tzinfo=timezone.utc)
                     measurement['tag_id'] = tag['_id']
+                    updateInsert('measures', measurement)
                     print(f'Measurement: {measurement}\n')
             
 
