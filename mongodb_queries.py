@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from mongodb_env import load_env
 from bson.objectid import ObjectId
-from datetime import datetime, timedelta
+from datetime import datetime
 
 client = load_env()
 
@@ -130,59 +130,32 @@ def get_average_temperature_for_date(input_date):
     print(f"No data found for date: {input_date}")
 
 # Example usage:
+# Replace '2023-09-09' with the date you want to query.
 get_average_temperature_for_date('2023-09-09')
 get_average_temperature_for_date('2023-09-02')
 get_average_temperature_for_date('2023-09-01')
 
 
 
-# above code as a function that really only
-# calculates the temprature for the input date 
-def get_average_temperature_for_date_eff(input_date):
-    # Convert the input date to a datetime object
-    input_datetime = datetime.strptime(input_date, "%Y-%m-%d")
+'''
+hier wird getestet, wie häufig neue Daten erfasst werden.
+Wir haben in 0:29:59.19500 62280 measures erfasst,
+sodass etwa 35 Measures pro Sekunde erfasst wurden.
+'''
+# select collection
+collection = db['measures2']
 
-    # Calculate the end of the day for input_date
-    end_of_day = input_datetime + timedelta(days=1)
-    
-    # Define the aggregation stages as strings
-    stage1 = {
-        "$match": {
-            "recorded_time": {
-                "$gte": input_datetime,   # Match records on or after the input date
-                "$lt": end_of_day        # Match records before the next day
-            }
-        }
-    }
+# Query the earliest and latest recorded times
+earliest_recorded_time = collection.find_one({}, sort=[("recorded_time", 1)])["recorded_time"]
+latest_recorded_time = collection.find_one({}, sort=[("recorded_time", -1)])["recorded_time"]
 
-    stage2 = {
-        "$group": {
-            "_id": None,  # Group all matched records together
-            "average_temperature": {
-                "$avg": "$temperature"
-            }
-        }
-    }
+# Calculate the time difference
+time_difference = latest_recorded_time - earliest_recorded_time
 
-    # Construct the aggregation pipeline
-    pipeline = [stage1, stage2]
-
-    # Execute the aggregation query
-    results = list(measures_collection.aggregate(pipeline))
-
-    if results:
-        average_temperature = results[0]["average_temperature"]
-        print(f"Date: {input_date}, Average Temperature: {average_temperature:.2f}°C")
-    else:
-        # If no data is found for the input date
-        print(f"No data found for date: {input_date}")
-
-
-# Example usage:
-get_average_temperature_for_date_eff('2023-09-09')
-get_average_temperature_for_date_eff('2023-09-02')
-get_average_temperature_for_date_eff('2023-09-01')
-
+# Print the results
+print(f"Earliest Recorded Time: {earliest_recorded_time}")
+print(f"Latest Recorded Time: {latest_recorded_time}")
+print(f"Time Difference: {time_difference}")
 
 
 client.close()
