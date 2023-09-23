@@ -141,9 +141,13 @@ get_average_temperature_for_date('2023-09-01')
 hier wird getestet, wie häufig neue Daten erfasst werden.
 Wir haben in 0:29:59.19500 62280 measures erfasst,
 sodass etwa 35 Measures pro Sekunde erfasst wurden.
+
+Ohne print im Import-Code:
+In etwa 10 Minuten 24308 measures, sodass etwa 40 
+Measures pro Sekunde erfasst wurden.
 '''
 # select collection
-collection = db['measures2']
+collection = db['measures']
 
 # Query the earliest and latest recorded times
 earliest_recorded_time = collection.find_one({}, sort=[("recorded_time", 1)])["recorded_time"]
@@ -156,6 +160,45 @@ time_difference = latest_recorded_time - earliest_recorded_time
 print(f"Earliest Recorded Time: {earliest_recorded_time}")
 print(f"Latest Recorded Time: {latest_recorded_time}")
 print(f"Time Difference: {time_difference}")
+
+'''
+This code deletes all documents from the specified collection
+
+# select collection
+collection = db['measures']
+# Delete all documents from the collection
+result = collection.delete_many({})
+# Print the number of deleted documents
+print(f"Deleted {result.deleted_count} documents from the collection.")
+'''
+
+'''
+This code prints all tag_ids from the measurements
+collection with their respective highest page number
+'''
+# select the collection
+collection = db['measures']
+
+# Define the aggregation pipeline
+pipeline = [
+    # Stage 1: Group documents by 'tag_id' and find the max 'page' in each group
+    {
+        "$group": {
+            "_id": "$tag_id",
+            "max_page": {"$max": "$page"}
+        }
+    }
+]
+
+# Execute the aggregation query
+results = list(collection.aggregate(pipeline))
+
+# Iterate through the results and print tag_id and max_page
+for result in results:
+    tag_id = result["_id"]
+    max_page = result["max_page"]
+    print(f"Tag ID: {tag_id}, Highest Page: {max_page}")
+
 
 
 client.close()
