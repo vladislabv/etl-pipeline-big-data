@@ -4,7 +4,7 @@ import requests
 from dotenv import load_dotenv
 from datetime import datetime, timedelta, timezone
 from api import check_api_is_up, get_gateways, get_tags, get_measurements, get_configs, get_configssing
-from update import updateInsert, closeclient
+from update import updateInsert, closeclient, getLastPageNumber, deleteMeasurements, checkLastTag
 
 
 load_dotenv()  # take environment variables from .env.
@@ -19,6 +19,8 @@ with requests.Session() as s:
     numbergateways = 0
     numbertags = 0
 
+    deleteMeasurements()
+
     s.headers.update(HEADERS)
     print(f'Checking if API is up at {HOST}')
     if check_api_is_up(s):
@@ -27,8 +29,8 @@ with requests.Session() as s:
     
         for gateway in get_gateways(s):
             numbergateways += 1
-            print(f'Gateway: {gateway["id"]}\n')
-            print('Getting tags')
+            #print(f'Gateway: {gateway["id"]}\n')
+            #print('Getting tags')
 
             gatewayconfig = get_configssing(s, gateway["id"])
             
@@ -40,33 +42,34 @@ with requests.Session() as s:
             gateway['config'] = gatewayconfig
             gateway['tags_assigned'] = []
 
-            print(f'Config for gateway: {gatewayconfig}\n')
+            #print(f'Config for gateway: {gatewayconfig}\n')
 
             for tag in get_tags(s, gateway['_id']):
                 numbertags += 1
-                print(f'Tag: {tag["address"]}\n')
+                #print(f'Tag: {tag["address"]}\n')
 
                 tag['_id'] = tag.pop('address')
                 tag['last_contact'] = datetime.strptime(tag['last_contact'][:-4], "%Y-%m-%dT%H:%M:%S.%f").replace(tzinfo=timezone.utc)
                 tag.pop('sensors')
-
+                tag['inserttimestamp'] = datetime.now()
                 tagconfig = get_configssing(s, gateway["_id"], tag['_id'])
-                print(f'Config for tag: {tagconfig}\n')
+                #print(f'Config for tag: {tagconfig}\n')
 
                 tag['config'] = tagconfig
             
                 gateway['tags_assigned'].append(tag['_id'])
                 
-                updateInsert('tags', tag)
+                if checkLastTag(tag):
+                    updateInsert('tags', tag)
 
                 print('Getting measurements')
 
-                for measurement in get_measurements(s, tag['_id']):
+                for measurement in get_measurements(s, tag['_id'], getLastPageNumber(tag['_id'])):
                     numbermeasurements += 1
                     measurement['recorded_time'] = datetime.strptime(measurement['recorded_time'][:-4], "%Y-%m-%dT%H:%M:%S.%f").replace(tzinfo=timezone.utc)
                     measurement['tag_id'] = tag['_id']
                     updateInsert('measures', measurement)
-                    print(f'Measurement: {measurement}\n')
+                    #print(f'Measurement: {measurement}\n')
             
 
 

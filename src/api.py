@@ -30,12 +30,13 @@ def get_tags(session, gateway_id):
 
 
 def stop_iteration(elem, stop_at):
+   #Hier muss ab dem punkt abgeschnitten werden!
    return datetime.strptime(elem['recorded_time'][:-4], "%Y-%m-%dT%H:%M:%S.%f").replace(tzinfo=timezone.utc) < stop_at.replace(tzinfo=timezone.utc)
 
 
 # Caution for really long measurements running this function will take a long time
 # by default only measures from 12 hours ago are returned
-def get_measurements(session, tag_ip6, stop_at=(datetime.now()-timedelta(hours=12)), start_page=1, paginate=True):
+def get_measurements(session, tag_ip6, start_page=1, stop_at=(datetime.now()-timedelta(hours=12)), paginate=True):    
     r = session.get(f'{API}/acc-data/get/{tag_ip6}/{start_page}')
     if r.status_code == 200:
         res = r.json()
@@ -44,7 +45,8 @@ def get_measurements(session, tag_ip6, stop_at=(datetime.now()-timedelta(hours=1
             return
         # yield found measurements
         for measurement in res['measurements']:
-            if measurement:
+            if measurement and (res['size'] == 10):
+                measurement['page'] =  res['page']
                 yield measurement
 
         if paginate:
@@ -55,9 +57,10 @@ def get_measurements(session, tag_ip6, stop_at=(datetime.now()-timedelta(hours=1
                 r = session.get(f'{API}/acc-data/get/{tag_ip6}/{start_page}')
                 if r.status_code == 200:
                     res = r.json()
-                    if res["page"] < res["next_page"]:
+                    if (res['page'] < res['next_page']) and (res['size'] == 10):
                         for measurement in res['measurements']:
                             if measurement and not stop_iteration(measurement, stop_at):
+                                measurement['page'] = res['page']
                                 yield measurement
                     else:
                         nextTag = True
