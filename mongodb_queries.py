@@ -210,9 +210,7 @@ Select gateway, count(tag_id)
 '''
 pipeline = [
     # Stage 1: Unwind the tags_assigned array
-    {
-        "$unwind": "$tags_assigned"
-    },
+    {"$unwind": "$tags_assigned"},
     # Stage 2: Group by gateway_id and count the number of tags_assigned
     {
         "$group": {
@@ -221,15 +219,12 @@ pipeline = [
             "tag_count": {"$sum": 1}
         }
     },
-    # Stage 3: Project the fields for the final result
-    {
-        "$project": {
-            "_id": 0,
-            "gateway_id": 1,
-            "tag_count": 1
-        }
-    }
+    # Stage 3: Sort the result by tag_count in descending order
+    {"$sort": {"tag_count": 1}},
+    # Stage 4: Project the fields for the final result
+    {"$project": {"_id": 0, "gateway_id": 1, "tag_count": 1}}
 ]
+
 
 # Execute the aggregation query
 results = list(gateways_collection.aggregate(pipeline))
