@@ -207,6 +207,37 @@ In welcher Abteilung halten sich die meisten Kunden auf?
 Anzahl der Tags je Gateway ermitteln
 Select gateway, count(tag_id)
 '''
+pipeline = [
+    # Stage 1: Unwind the tags_assigned array
+    {
+        "$unwind": "$tags_assigned"
+    },
+    # Stage 2: Group by gateway_id and count the number of tags_assigned
+    {
+        "$group": {
+            "_id": "$_id",
+            "gateway_id": {"$first": "$_id"},
+            "tag_count": {"$sum": 1}
+        }
+    },
+    # Stage 3: Project the fields for the final result
+    {
+        "$project": {
+            "_id": 0,
+            "gateway_id": 1,
+            "tag_count": 1
+        }
+    }
+]
+
+# Execute the aggregation query
+results = list(gateways_collection.aggregate(pipeline))
+
+# Print the results
+for result in results:
+    gateway_id = result["gateway_id"]
+    tag_count = result["tag_count"]
+    print(f"Gateway ID: {gateway_id}, Number of Tags Assigned: {tag_count}")
 
 
 '''
