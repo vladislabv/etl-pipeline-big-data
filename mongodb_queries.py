@@ -201,4 +201,40 @@ for result in results:
 
 
 
+'''
+Abfrage 1
+In welcher Abteilung halten sich die meisten Kunden auf? 
+Anzahl der Tags je Gateway ermitteln
+Select gateway, count(tag_id)
+'''
+
+
+'''
+Abfrage 2
+Wie lange verbringt ein Kunde in einer Abteilung?
+Zeitpunkte zwischen Gateway-Wechseln
+Select gateway, avg time 
+'''
+
+
+'''
+Abfrage 3
+Wo gibt es viele Zusammenstöße mit den Regalen? 
+Auf Acceleration über 200 m/s² nehmen - etwa 20g
+Endergebnis
+Select gateway, count(mesaures_über_20g)
+'''
+
+
+'''
+Abfrage 4
+Welche Abteilung hat die größten Acceleration Werte? 
+Höhere Average Acceleration-Werte je Gateway wird als Kundeninteresse an Artikeln gedeutet
+SELECT gateway, avg acceleartion je xyz 
+'''
+
+
+
+
+
 client.close()
