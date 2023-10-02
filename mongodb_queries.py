@@ -2,6 +2,7 @@ from pymongo import MongoClient
 from mongodb_env import load_env
 from bson.objectid import ObjectId
 from datetime import datetime
+import matplotlib.pyplot as plt
 
 client = load_env()
 
@@ -238,6 +239,20 @@ for result in results:
     gateway_id = result["gateway_id"]
     tag_count = result["tag_count"]
     print(f"Gateway ID: {gateway_id}, Number of Tags Assigned: {tag_count}")
+
+
+# Visualisierung der Abfrage
+# extract data for plotting
+gateway_ids = [result["gateway_id"] for result in results]
+tag_counts = [result["tag_count"] for result in results]
+mongodb_green = "#4DB33D"
+
+# Create a horizontal bar chart
+plt.barh(gateway_ids, tag_counts, color=mongodb_green)
+plt.xlabel('Number of Tags Assigned')
+plt.ylabel('Gateway ID')
+plt.title('Number of Tags (customers) per Gateway (department)')
+plt.show()
 
 
 '''
