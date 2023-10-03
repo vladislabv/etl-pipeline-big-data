@@ -1,10 +1,14 @@
+import os
 from pymongo import MongoClient
-from mongodb_env import load_env
+from dotenv import load_dotenv
 from bson.objectid import ObjectId
 from datetime import datetime
 import matplotlib.pyplot as plt
 
-client = load_env()
+load_dotenv()  # take environment variables from .env.
+
+# client = load_env()
+client = MongoClient('mongodb+srv://' + os.getenv('MongoUser') + ':' + os.getenv('MongoPassword') + '@mongodbcluster.n6cun7v.mongodb.net/')
 
 for db_name in client.list_database_names():
     print(db_name)
@@ -251,6 +255,59 @@ plt.show()
 
 
 '''
+Hilfsabfrage, um die Anzahl der measures je Gateway zu ermitteln
+'''
+# Define the pipeline for the main query (simplified)
+pipeline = [
+    # Stage 1: Unwind the tags_assigned array
+    {"$unwind": "$tags_assigned"},
+    # Stage 2: Group by gateway_id and count the number of tags_assigned
+    {
+        "$group": {
+            "_id": "$_id",
+            "gateway_id": {"$first": "$_id"},
+            "tag_count": {"$sum": 1},
+            "tags": {"$push": "$tags_assigned"}
+        }
+    },
+    # Stage 3: Project the fields for debugging
+    {"$project": {"_id": 0, "gateway_id": 1, "tag_count": 1, "tags": 1}},
+]
+
+# Execute the main aggregation query
+results = list(gateways_collection.aggregate(pipeline))
+
+# Print the intermediate results for debugging
+for result in results:
+    print(result)
+
+
+# Continue the pipeline to include measures count for each tag
+pipeline += [
+    # Stage 4: Unwind the tags array
+    {"$unwind": "$tags"},
+    # Stage 5: Lookup measures for each tag
+    {
+        "$lookup": {
+            "from": "measures",
+            "localField": "tags",
+            "foreignField": "tag_id",
+            "as": "measures"
+        }
+    },
+    # Stage 6: Project the fields for debugging
+    {"$project": {"gateway_id": 1, "tag_count": 1, "tags": 1, "measures_count": {"$size": "$measures"}}},
+]
+
+# Execute the aggregation query
+results = list(gateways_collection.aggregate(pipeline))
+
+# Print the final results for debugging
+for result in results:
+    print(result)
+
+
+'''
 Abfrage 2
 Wie lange verbringt ein Kunde in einer Abteilung?
 Zeitpunkte zwischen Gateway-Wechseln
@@ -263,7 +320,9 @@ Abfrage 3
 Wo gibt es viele Zusammenstöße mit den Regalen? 
 Auf Acceleration über 200 m/s² nehmen - etwa 20g
 Endergebnis
-Select gateway, count(mesaures_über_20g)
+Select gateway, count(*)
+from gateway, left join tags_assigned on tag.tag_id left join measures.tag_id
+where acc_x > 20g or acc_y > 20g or acc_z > 20g 
 '''
 
 
@@ -271,7 +330,8 @@ Select gateway, count(mesaures_über_20g)
 Abfrage 4
 Welche Abteilung hat die größten Acceleration Werte? 
 Höhere Average Acceleration-Werte je Gateway wird als Kundeninteresse an Artikeln gedeutet
-SELECT gateway, avg acceleartion je xyz 
+SELECT gateway, avg(measures.acc_x), avg(measures.acc_y), avg(measures.acc_z)
+from gateway, left join tags_assigned on tag.tag_id left join measures.tag_id
 '''
 
 
