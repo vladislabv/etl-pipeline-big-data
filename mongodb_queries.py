@@ -19,6 +19,7 @@ db = client['MongoDB-Database']
 gateways_collection = db['gateways']
 measures_collection = db['measures']
 tags_collection = db['tags']
+mongodb_green = "#4DB33D"
 
 # query some document from a collection
 documents_to_find = {}
@@ -402,6 +403,83 @@ Zeitpunkte zwischen Gateway-Wechseln
 Select gateway, avg time 
 '''
 
+# Define a projection to retrieve only the desired fields
+projection = {
+    "_id": 0,  # Exclude the MongoDB document ID
+    "recorded_time": 1,
+    "gateway_id": 1,
+    "tag_id": "$tag_address",  # Assuming tag_id is stored in the tag_address field
+}
+
+# Fetch documents with the specified projection
+cursor = measures_collection.find({}, projection)
+
+# Convert the cursor to a list and then to a DataFrame
+measures_df = pd.DataFrame(list(cursor))
+
+# Convert recorded_time to datetime format
+measures_df["recorded_time"] = pd.to_datetime(measures_df["recorded_time"])
+
+# Sort the DataFrame by recorded_time
+measures_df.sort_values(by="recorded_time", inplace=True)
+
+# Calculate the time difference between consecutive records for the same tag_id and gateway_id
+measures_df["time_diff"]= measures_df.groupby(["tag_id", "gateway_id"])["recorded_time"].diff()
+
+# Identify distinct connection events (cases where the time difference is greater than 1 minute)
+time_threshold = pd.Timedelta(minutes=1)
+measures_df["new_connection_event"] = (measures_df["time_diff"] > time_threshold).astype(int)
+
+# Cumulative sum of new_connection_event to create groups
+measures_df["connection_event_group"] = measures_df.groupby("gateway_id")["new_connection_event"].cumsum()
+
+# Calculate the total connection time for each gateway_id and connection_event_group
+total_connection_time = measures_df.groupby(["gateway_id", "connection_event_group"])["recorded_time"].agg(["min", "max"]).reset_index()
+
+# Calculate the average connection time for each gateway_id
+average_connection_time = total_connection_time.copy()
+average_connection_time["duration"] = average_connection_time["max"] - average_connection_time["min"]
+average_connection_time["average_connection_time"] = average_connection_time["duration"] / pd.Timedelta(seconds=1)  # Convert to seconds for average
+
+# Sort the DataFrame by average_connection_time in descending order
+average_connection_time_sorted = average_connection_time.sort_values(by='average_connection_time', ascending=False)
+
+'''Below is the visualisation code'''
+# Group by gateway_id and calculate the average connection time
+grouped_gateways = average_connection_time_sorted.groupby('gateway_id')['average_connection_time'].mean().reset_index()
+
+# Sort the grouped DataFrame by average connection time in descending order
+grouped_gateways_sorted = grouped_gateways.sort_values(by='average_connection_time', ascending=False)
+
+# Display the result
+print(grouped_gateways_sorted[["gateway_id", "average_connection_time"]])
+
+# Top 5 gateways
+top5_gateways = grouped_gateways_sorted.head(5).sort_values(by='average_connection_time', ascending=True)
+
+# Bottom 5 gateways
+bottom5_gateways = grouped_gateways_sorted.tail(5).sort_values(by='average_connection_time', ascending=True)
+
+# Visualization
+plt.figure(figsize=(10, 6))
+
+# Top 5
+plt.subplot(2, 1, 1)
+plt.barh(top5_gateways['gateway_id'], top5_gateways['average_connection_time'], color=mongodb_green)
+plt.yticks(top5_gateways['gateway_id'], top5_gateways['gateway_id'])
+plt.xlabel('Average Connection Time (s)')
+plt.title('Top 5 Gateways by Average Connection Time')
+
+# Bottom 5
+plt.subplot(2, 1, 2)
+plt.barh(bottom5_gateways['gateway_id'], bottom5_gateways['average_connection_time'], color=mongodb_green)
+plt.yticks(bottom5_gateways['gateway_id'], bottom5_gateways['gateway_id'])
+plt.xlabel('Average Connection Time (s)')
+plt.title('Bottom 5 Gateways by Average Connection Time')
+
+# Adjust layout
+plt.tight_layout()
+plt.show()
 
 
 client.close()
