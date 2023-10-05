@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from bson.objectid import ObjectId
 from datetime import datetime
 import matplotlib.pyplot as plt
+import pandas as pd
 
 load_dotenv()  # take environment variables from .env.
 
@@ -255,68 +256,7 @@ plt.show()
 
 
 '''
-Hilfsabfrage, um die Anzahl der measures je Gateway zu ermitteln
-'''
-# Define the pipeline for the main query (simplified)
-pipeline = [
-    # Stage 1: Unwind the tags_assigned array
-    {"$unwind": "$tags_assigned"},
-    # Stage 2: Group by gateway_id and count the number of tags_assigned
-    {
-        "$group": {
-            "_id": "$_id",
-            "gateway_id": {"$first": "$_id"},
-            "tag_count": {"$sum": 1},
-            "tags": {"$push": "$tags_assigned"}
-        }
-    },
-    # Stage 3: Project the fields for debugging
-    {"$project": {"_id": 0, "gateway_id": 1, "tag_count": 1, "tags": 1}},
-]
-
-# Execute the main aggregation query
-results = list(gateways_collection.aggregate(pipeline))
-
-# Print the intermediate results for debugging
-for result in results:
-    print(result)
-
-
-# Continue the pipeline to include measures count for each tag
-pipeline += [
-    # Stage 4: Unwind the tags array
-    {"$unwind": "$tags"},
-    # Stage 5: Lookup measures for each tag
-    {
-        "$lookup": {
-            "from": "measures",
-            "localField": "tags",
-            "foreignField": "tag_id",
-            "as": "measures"
-        }
-    },
-    # Stage 6: Project the fields for debugging
-    {"$project": {"gateway_id": 1, "tag_count": 1, "tags": 1, "measures_count": {"$size": "$measures"}}},
-]
-
-# Execute the aggregation query
-results = list(gateways_collection.aggregate(pipeline))
-
-# Print the final results for debugging
-for result in results:
-    print(result)
-
-
-'''
 Abfrage 2
-Wie lange verbringt ein Kunde in einer Abteilung?
-Zeitpunkte zwischen Gateway-Wechseln
-Select gateway, avg time 
-'''
-
-
-'''
-Abfrage 3
 Wo gibt es viele Zusammenstöße mit den Regalen? 
 Auf Acceleration über 200 m/s² nehmen - etwa 20g
 Endergebnis
@@ -327,14 +267,78 @@ where acc_x > 20g or acc_y > 20g or acc_z > 20g
 
 
 '''
-Abfrage 4
+Abfrage 3
 Welche Abteilung hat die größten Acceleration Werte? 
 Höhere Average Acceleration-Werte je Gateway wird als Kundeninteresse an Artikeln gedeutet
 SELECT gateway, avg(measures.acc_x), avg(measures.acc_y), avg(measures.acc_z)
 from gateway, left join tags_assigned on tag.tag_id left join measures.tag_id
 '''
 
+pipeline = [
+    # Stage 1: Group by gateway_id and calculate average for each field
+    {
+        "$group": {
+            "_id": "$gateway_id",
+            "avg_acc_x": {"$avg": "$acc_x"},
+            "avg_acc_y": {"$avg": "$acc_y"},
+            "avg_acc_z": {"$avg": "$acc_z"}
+        }
+    }
+]
 
+# Execute the aggregation query
+results = list(measures_collection.aggregate(pipeline))
+
+# Print the results
+for result in results:
+    gateway_id = result["_id"]  # Use "_id" as it is the grouped field
+    avg_acc_x = result["avg_acc_x"]
+    avg_acc_y = result["avg_acc_y"]
+    avg_acc_z = result["avg_acc_z"]
+    print(f"Gateway ID: {gateway_id}, Average acc_x: {avg_acc_x}, Average acc_y: {avg_acc_y}, Average acc_z: {avg_acc_z}")
+
+# Extract data for visualization
+gateway_ids = [result["_id"] for result in results]
+avg_acc_x_values = [result["avg_acc_x"] for result in results]
+avg_acc_y_values = [result["avg_acc_y"] for result in results]
+avg_acc_z_values = [result["avg_acc_z"] for result in results]
+
+
+# Visualization
+# Convert the results to a pandas DataFrame
+df = pd.DataFrame(results)
+
+# Sort the DataFrame by average acceleration values and filter on top 5 results
+df_sorted_x = df.sort_values(by='avg_acc_x', ascending=False).head(5).sort_values(by='avg_acc_x', ascending=True)
+df_sorted_y = df.sort_values(by='avg_acc_y', ascending=False).head(5).sort_values(by='avg_acc_y', ascending=True)
+df_sorted_z = df.sort_values(by='avg_acc_z', ascending=False).head(5).sort_values(by='avg_acc_z', ascending=True)
+
+# Plotting horizontal bar graphs for top 5 gateways
+plt.figure(figsize=(10, 6))
+
+# Plot for acc_x
+plt.subplot(3, 1, 1)
+plt.barh(df_sorted_x['_id'], df_sorted_x['avg_acc_x'], color=mongodb_green)
+plt.yticks(df_sorted_x['_id'], df_sorted_x['_id'])
+plt.xlabel('Average acc_x')
+plt.title('Top 5 Gateways - Average Acceleration in X Direction')
+
+# Plot for acc_y
+plt.subplot(3, 1, 2)
+plt.barh(df_sorted_y['_id'], df_sorted_y['avg_acc_y'], color=mongodb_green)
+plt.yticks(df_sorted_y['_id'], df_sorted_y['_id'])
+plt.xlabel('Average acc_y')
+plt.title('Top 5 Gateways - Average Acceleration in Y Direction')
+
+plt.tight_layout()
+plt.show()
+
+'''
+Abfrage 4
+Wie lange verbringt ein Kunde in einer Abteilung?
+Zeitpunkte zwischen Gateway-Wechseln
+Select gateway, avg time 
+'''
 
 
 
