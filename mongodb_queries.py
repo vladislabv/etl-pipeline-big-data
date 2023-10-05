@@ -264,6 +264,68 @@ Select gateway, count(*)
 from gateway, left join tags_assigned on tag.tag_id left join measures.tag_id
 where acc_x > 20g or acc_y > 20g or acc_z > 20g 
 '''
+pipeline = [
+    # Stage 1: Filter documents where acc_x is above the threshold
+    {
+        "$match": {
+            "acc_x": {"$gt": 200}
+        }
+    },
+    # Stage 2: Group by gateway_id and count the documents
+    {
+        "$group": {
+            "_id": "$gateway_id",
+            "count_acc_x_above_20g": {"$sum": 1}
+        }
+    }
+]
+
+# Execute the aggregation query
+results_acc_x = list(measures_collection.aggregate(pipeline))
+
+
+pipeline = [
+    # Stage 1: Filter documents where acc_x is above the threshold
+    {
+        "$match": {
+            "acc_y": {"$gt": 200}
+        }
+    },
+    # Stage 2: Group by gateway_id and count the documents
+    {
+        "$group": {
+            "_id": "$gateway_id",
+            "count_acc_y_above_20g": {"$sum": 1}
+        }
+    }
+]
+
+# Execute the aggregation query
+results_acc_y = list(measures_collection.aggregate(pipeline))
+
+# convert the results to a pandas DataFrame
+df_acc_x_above_threshold = pd.DataFrame(results_acc_x)
+df_acc_y_above_threshold = pd.DataFrame(results_acc_y)
+
+# Sort the DataFrame by the count values and filter on top 5 results
+df_sorted_acc_x = df_acc_x_above_threshold.sort_values(by='count_acc_x_above_20g', ascending=False).head(5).sort_values(by='count_acc_x_above_20g', ascending=True)
+df_sorted_acc_y = df_acc_y_above_threshold.sort_values(by='count_acc_y_above_20g', ascending=False).head(5).sort_values(by='count_acc_y_above_20g', ascending=True)
+
+plt.figure(figsize=(10, 6))
+# Plot x data
+plt.subplot(2, 1, 1)
+plt.barh(df_sorted_acc_x['_id'], df_sorted_acc_x['count_acc_x_above_20g'], color=mongodb_green)
+plt.xlabel('Count of acc_x above 20G')
+plt.ylabel('Gateway ID')
+plt.title('Top 5 Gateways with the Most acc_x Above 20G')
+
+plt.subplot(2, 1, 2)
+plt.barh(df_sorted_acc_y['_id'], df_sorted_acc_y['count_acc_y_above_20g'], color=mongodb_green)
+plt.xlabel('Count of acc_y above 20G')
+plt.ylabel('Gateway ID')
+plt.title('Top 5 Gateways with the Most acc_y Above 20G')
+plt.tight_layout()
+plt.show()
 
 
 '''
@@ -317,14 +379,14 @@ df_sorted_z = df.sort_values(by='avg_acc_z', ascending=False).head(5).sort_value
 plt.figure(figsize=(10, 6))
 
 # Plot for acc_x
-plt.subplot(3, 1, 1)
+plt.subplot(2, 1, 1)
 plt.barh(df_sorted_x['_id'], df_sorted_x['avg_acc_x'], color=mongodb_green)
 plt.yticks(df_sorted_x['_id'], df_sorted_x['_id'])
 plt.xlabel('Average acc_x')
 plt.title('Top 5 Gateways - Average Acceleration in X Direction')
 
 # Plot for acc_y
-plt.subplot(3, 1, 2)
+plt.subplot(2, 1, 2)
 plt.barh(df_sorted_y['_id'], df_sorted_y['avg_acc_y'], color=mongodb_green)
 plt.yticks(df_sorted_y['_id'], df_sorted_y['_id'])
 plt.xlabel('Average acc_y')
