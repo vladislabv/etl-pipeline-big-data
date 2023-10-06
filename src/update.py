@@ -44,9 +44,17 @@ def getLastPageNumber(tag_id):
 def checkLastTag(currentTag):
 
   #currentTag.pop('last_contact')
-  #result = coltags.find_one({"_id": currentTag['_id']}, sort=[("inserttimestamp", -1)])
+  result = coltags.find_one({'address': currentTag['address']}, sort=[('inserttimestamp', -1)])
+  
+  if not result:
+    return True
+  
+  tempreturn = ((sorted(currentTag['config'].items()) != sorted(result['config'].items())) or (currentTag['online'] != result['online'])) 
+  
+  if tempreturn:
+    print('Tag wird gespeichert')
 
-  return True
+  return tempreturn
 
 
 
@@ -59,8 +67,8 @@ def updateInsert (collection, json):
     x = colgateways.update_one(query, value, upsert = True)
 
   if collection == "tags":
-    query = {'_id': json['_id']}
-    value = {'$set': json}
+    #query = {'_id': json['_id']}
+    #value = {'$set': json}
 
     #x = coltags.update_one(query, value, upsert = True)
     #json['inserttimestamp'] = time.time()

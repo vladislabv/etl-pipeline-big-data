@@ -52,12 +52,14 @@ def get_measurements(session, tag_ip6, start_page=1, stop_at=(datetime.now()-tim
         if paginate:
             # iterate over the measurements
             nextTag = False
+            measuredPages = 0
             while not nextTag:
+                measuredPages += 1
                 start_page += 1
                 r = session.get(f'{API}/acc-data/get/{tag_ip6}/{start_page}')
                 if r.status_code == 200:
                     res = r.json()
-                    if (res['page'] < res['next_page']) and (res['size'] == 10):
+                    if ((res['page'] < res['next_page']) and (res['size'] == 10) and measuredPages < 49):
                         for measurement in res['measurements']:
                             if measurement and not stop_iteration(measurement, stop_at):
                                 measurement['page'] = res['page']
