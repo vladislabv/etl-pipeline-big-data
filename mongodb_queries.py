@@ -360,14 +360,13 @@ for result in results:
     avg_acc_z = result["avg_acc_z"]
     print(f"Gateway ID: {gateway_id}, Average acc_x: {avg_acc_x}, Average acc_y: {avg_acc_y}, Average acc_z: {avg_acc_z}")
 
+# Visualization
 # Extract data for visualization
 gateway_ids = [result["_id"] for result in results]
 avg_acc_x_values = [result["avg_acc_x"] for result in results]
 avg_acc_y_values = [result["avg_acc_y"] for result in results]
 avg_acc_z_values = [result["avg_acc_z"] for result in results]
 
-
-# Visualization
 # Convert the results to a pandas DataFrame
 df = pd.DataFrame(results)
 
@@ -424,7 +423,7 @@ measures_df["recorded_time"] = pd.to_datetime(measures_df["recorded_time"])
 measures_df.sort_values(by="recorded_time", inplace=True)
 
 # Calculate the time difference between consecutive records for the same tag_id and gateway_id
-measures_df["time_diff"]= measures_df.groupby(["tag_id", "gateway_id"])["recorded_time"].diff()
+measures_df["time_diff"] = measures_df.groupby(["tag_id", "gateway_id"])["recorded_time"].diff()
 
 # Identify distinct connection events (cases where the time difference is greater than 1 minute)
 time_threshold = pd.Timedelta(minutes=1)
@@ -481,5 +480,121 @@ plt.title('Bottom 5 Gateways by Average Connection Time')
 plt.tight_layout()
 plt.show()
 
+
+'''Error check in data generation'''
+'''measures count je gateway'''
+pipeline = [
+    # Stage 2: Group by gateway_id and count the documents
+    {
+        "$group": {
+            "_id": "$gateway_id",
+            "count_acc_x_above_20g": {"$sum": 1}
+        }
+    }
+]
+
+# Execute the aggregation query
+results_acc_x = list(measures_collection.aggregate(pipeline))
+
+# convert the results to a pandas DataFrame
+df_acc_x_above_threshold = pd.DataFrame(results_acc_x)
+
+# Sort the DataFrame by the count values and filter on top 5 results
+df_sorted_acc_x = df_acc_x_above_threshold.sort_values(by='count_acc_x_above_20g', ascending=False).sort_values(by='count_acc_x_above_20g', ascending=True)
+
+plt.figure(figsize=(10, 6))
+# Plot x data
+plt.barh(df_sorted_acc_x['_id'], df_sorted_acc_x['count_acc_x_above_20g'], color=mongodb_green)
+plt.xlabel('Count of measures')
+plt.ylabel('Gateway ID')
+plt.title('measures count je gateway')
+plt.show()
+
+'''Count gateway and acc_x combinations'''
+pipeline = [
+    # Stage 1: Group by gateway_id and acc_x, count documents
+    {
+        "$group": {
+            "_id": {
+                "gateway_id": "$gateway_id",
+                "acc_x": "$acc_x"
+            },
+            "count": {"$sum": 1}
+        }
+    },
+    # Stage 2: Project the fields for clarity
+    {
+        "$project": {
+            "_id": 0,
+            "gateway_id": "$_id.gateway_id",
+            "acc_x": "$_id.acc_x",
+            "count": 1
+        }
+    }
+]
+
+# Execute the aggregation query
+results = list(measures_collection.aggregate(pipeline))
+
+# Print the results
+for result in results:
+    gateway_id = result["gateway_id"]
+    acc_x = result["acc_x"]
+    count = result["count"]
+    print(f"Gateway ID: {gateway_id}, acc_x: {acc_x}, Count: {count}")
+
+
+'''count distinct acc_x values'''
+pipeline = [
+    # Stage 1: Group by acc_x, count documents
+    {
+        "$group": {
+            "_id": "$acc_x",
+            "count": {"$sum": 1}
+        }
+    },
+    # Stage 2: Project the fields for clarity
+    {
+        "$project": {
+            "_id": 0,
+            "acc_x": "$_id",
+            "count": 1
+        }
+    }
+]
+
+# Execute the aggregation query
+results = list(measures_collection.aggregate(pipeline))
+
+# Print the results
+for result in results:
+    acc_x = result["acc_x"]
+    count = result["count"]
+    print(f"acc_x: {acc_x}, Count: {count}")
+
+
+# Define the projection to include only the desired fields
+projection = {"recorded_time": 1, "gateway_id": 1, "tag_address": 1, "acc_x": 1, "_id": 0}
+
+# Fetch documents with the specified projection
+cursor = measures_collection.find({}, projection)
+
+# Convert the cursor to a list (or any other preferred data structure)
+results = list(cursor)
+
+# Print the results
+for result in results:
+    recorded_time = result["recorded_time"]
+    gateway_id = result["gateway_id"]
+    tag_id = result["tag_address"]
+    acc_x = result["acc_x"]
+    print(f"Recorded Time: {recorded_time}, Gateway ID: {gateway_id}, Tag ID: {tag_id}, acc_x: {acc_x}")
+
+'''output data for further investigation'''
+# Convert the cursor to a DataFrame
+df = pd.DataFrame(results)
+
+# Save the DataFrame to an Excel file
+df.to_excel("output.xlsx", index=False)
 
 client.close()
