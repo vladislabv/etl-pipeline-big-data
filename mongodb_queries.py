@@ -546,37 +546,30 @@ for result in results:
 
 '''count distinct acc_x values'''
 pipeline = [
-    # Stage 1: Group by acc_x, count documents
+    # stage 1: group by acc_x and count documents
     {
         "$group": {
             "_id": "$acc_x",
             "count": {"$sum": 1}
         }
-    },
-    # Stage 2: Project the fields for clarity
-    {
-        "$project": {
-            "_id": 0,
-            "acc_x": "$_id",
-            "count": 1
-        }
     }
 ]
 
-# Execute the aggregation query
+# execute the aggregation query
 results = list(measures_collection.aggregate(pipeline))
 
-# Print the results
+# print the results
 for result in results:
-    acc_x = result["acc_x"]
+    acc_x = result["_id"]  # Use _id directly as acc_x
     count = result["count"]
     print(f"acc_x: {acc_x}, Count: {count}")
 
 
-# Define the projection to include only the desired fields
+'''get all data as a dataframe'''
+# define the projection to include only the desired fields
 projection = {"recorded_time": 1, "gateway_id": 1, "tag_address": 1, "acc_x": 1, "_id": 0}
 
-# Fetch documents with the specified projection
+# get documents with the specified projection
 cursor = measures_collection.find({}, projection)
 
 # Convert the cursor to a list (or any other preferred data structure)
@@ -590,11 +583,11 @@ for result in results:
     acc_x = result["acc_x"]
     print(f"Recorded Time: {recorded_time}, Gateway ID: {gateway_id}, Tag ID: {tag_id}, acc_x: {acc_x}")
 
-'''output data for further investigation'''
 # Convert the cursor to a DataFrame
 df = pd.DataFrame(results)
 
-# Save the DataFrame to an Excel file
+'''output data for further investigation'''
+# export the dataframe to an xlsx file
 df.to_excel("output.xlsx", index=False)
 
 client.close()
