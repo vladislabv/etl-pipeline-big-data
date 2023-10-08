@@ -59,7 +59,7 @@ def get_measurements(session, tag_ip6, start_page=1, stop_at=(datetime.now()-tim
                 r = session.get(f'{API}/acc-data/get/{tag_ip6}/{start_page}')
                 if r.status_code == 200:
                     res = r.json()
-                    if ((res['page'] < res['next_page']) and (res['size'] == 10) and measuredPages < 49):
+                    if ((res['page'] < res['next_page']) and (res['size'] == 10) and measuredPages < 20):
                         for measurement in res['measurements']:
                             if measurement and not stop_iteration(measurement, stop_at):
                                 measurement['page'] = res['page']
@@ -96,8 +96,12 @@ def get_configssing(session: requests.Session, gateway_id, tag_ipv6= ''):
 
     if tag_ipv6 == '':
         r = session.get(f'{API}/config/get/{gateway_id}')
-        return r.json()['config']  
+        if 'config' in r.json():
+            return r.json()['config']  
     else:
         r = session.get(f'{API}/config/get/{gateway_id}/{tag_ipv6}')
-        return r.json()['config']
+        if 'config' in r.json():
+            return r.json()['config']
+    
+    return []
         

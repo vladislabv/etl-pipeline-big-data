@@ -19,7 +19,7 @@ with requests.Session() as s:
     numbergateways = 0
     numbertags = 0
 
-    deleteMeasurements()
+    #deleteMeasurements()
 
     s.headers.update(HEADERS)
     print(f'Checking if API is up at {HOST}')
