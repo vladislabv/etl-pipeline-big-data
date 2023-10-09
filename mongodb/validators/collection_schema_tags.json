@@ -1,8 +1,10 @@
 {
   "$jsonSchema": {
-    "required": [ "_id", "name", "last_contact", "online", "config" ],
+    "required": [ "_id", "address", "gateway_id", "name", "last_contact", "online", "config" ],
     "properties": {
-      "_id": { "bsonType": "string", "minLength": 11, "maxLength": 17, "description": "unique MAC-address of the tag (bluetooth MAC)" },
+      "_id": { "bsonType": "objectId" },
+      "address": { "bsonType": "string", "minLength": 11, "maxLength": 17, "description": "unique MAC-address of the tag (bluetooth MAC)" },
+      "gateway_id": { "bsonType": "string", "description": "Unique identifier for the gateway, on the last_contact datetime the tag was assigned to"},
       "name": { "bsonType": "string", "minLength": 1, "description": "name of the tag that derives from the MAC-address" },
       "last_contact": { "bsonType": "date" },
       "online": { "bsonType": "bool" },

@@ -1,0 +1,98 @@
+version: '3'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+    networks:
+      - mqtt_network
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  node-red:
+    build:
+      context: .
+      dockerfile_inline: |
+       FROM nodered/node-red:latest
+       RUN npm install node-red-node-mongodb
+       RUN npm install node-red-contrib-loop
+       RUN npm install node-red-debugger
+       RUN npm install node-red-contrib-increment
+       RUN npm install node-red-contrib-key-value-store
+    container_name: node-red
+    ports:
+      - "1880:1880"
+    depends_on:
+      - db
+      - mosquitto
+    volumes:
+      - ./settings.js:/data/settings.js
+      - ./data/nodered:/data
+    networks:
+      - mqtt_network
+    
+  ruuvi-tags:
+    image: ghcr.io/systematiccaos/ruuvi-simulator/sim:master 
+    container_name: rest-api
+    ports:
+       - "8080:8080"
+    depends_on:
+       - node-red
+    networks:
+       - mqtt_network
+
+  python_listener:
+    build:
+      context: .
+      dockerfile_inline: |
+       FROM python:3.11-slim-bookworm
+       RUN pip install aiomqtt aiofiles motor
+       WORKDIR /var/scripts/python
+       CMD ["python", "listener.py"]
+    container_name: python_listener
+    depends_on:
+      - db
+      - mosquitto
+    volumes:
+      - ./python:/var/scripts/python
+    environment:
+      - MONGO_URI=mongodb://$DOCKER_MONGO_USERNAME:$DOCKER_MONGO_PASSWORD@db:$MONGO_PORT/
+      - MQTT_BROKER_HOST=$MQTT_BROKER_HOST
+      - MQTT_BROKER_PORT=$MQTT_BROKER_PORT
+    networks:
+      - mqtt_network
+
+  db:
+    image: mongo:latest
+    container_name: db
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=$DOCKER_MONGO_USERNAME
+      - MONGO_INITDB_ROOT_PASSWORD=$DOCKER_MONGO_PASSWORD
+    volumes:
+      - ./data/mongodb:/data/db
+    networks:
+      - mqtt_network
+
+  mongo-express:
+    image: mongo-express
+    container_name: db-express
+    restart: unless-stopped
+    environment:
+      - ME_CONFIG_OPTIONS_EDITORTHEME=ambiance
+      - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      - ME_CONFIG_MONGODB_URL=mongodb://$DOCKER_MONGO_USERNAME:$DOCKER_MONGO_PASSWORD@db:$MONGO_PORT/admin?ssl=false
+    depends_on:
+      - db
+    ports:
+      - "8081:8081"
+    networks:
+      - mqtt_network
+    
+  
+      
+networks:
+  mqtt_network:
+    driver: bridge
