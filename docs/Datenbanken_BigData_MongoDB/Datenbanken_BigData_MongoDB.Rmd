@@ -1,0 +1,86 @@
+---
+title: "Datenbanken in BigData: Team MongoDB"
+abstract: ""
+keywords: "MongoDB, Python"
+
+course: Datenbanken in Big Data (Prof. Dr. Buchwitz)
+supervisor: Marius ...
+city: Meschede
+
+# List of Authors
+author:
+- familyname: Stasenko
+  othernames: Vladislav
+  address: "MatNr: 30345058"
+  qualifications: "Data Science (MA, 2. Semester)"
+  email: stasenko.vladislav@fh-swf.de
+- familyname: Mustermann
+  othernames: Max
+  address: "MatNr: 87654321"
+  qualifications: "Electrical Engineering (MA, 1. Semester)"
+  email: mustermann.max@fh-swf.de
+
+# Language Options
+german: true # German Dummy Text
+lang: de-de   # Text Language: en-gb, en-us, de-de
+
+# Indexes
+toc: true     # Table of Contents
+lot: false    # List of Tables
+lof: false    # List of Figures
+
+# Output Options
+bibliography: references.bib
+biblio-style: authoryear-comp
+blind: false
+cover: true
+checklist: false
+output:
+  fhswf::seminarpaper:
+    fig_caption: yes
+    fig_height: 5
+    fig_width: 8
+    keep_tex: no
+    number_sections: yes
+    citation_package: biblatex
+knit: fhswf::render_seminarpaper
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache=FALSE, messages=FALSE, warning=FALSE, 
+                      attr.source='.numberLines', singlespacing = TRUE)
+fhswf::fhswf_hooks()
+
+# Load Packages
+library(fhswf)
+library(ggplot2)
+```
+
+
+# Einführung
+
+## Datenbeschreibung
+
+# Anwendungsfall
+
+# Datenbankstuktur
+
+# Python-Applikation
+
+# Fazit
+
+## Challenges
+
+## Lessons Learned
+
+# Citation
+
+\newpage
+
+# Technical Appendix {-}
+
+```{r, echo = TRUE}
+Sys.time()
+sessionInfo()
+```
+
