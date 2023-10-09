@@ -14,11 +14,36 @@ author:
   address: "MatNr: 30345058"
   qualifications: "Data Science (MA, 2. Semester)"
   email: stasenko.vladislav@fh-swf.de
-- familyname: Mustermann
-  othernames: Max
-  address: "MatNr: 87654321"
-  qualifications: "Electrical Engineering (MA, 1. Semester)"
-  email: mustermann.max@fh-swf.de
+
+- familyname: Ulbrich
+  othernames: Patrick Adrian
+  address: "MatNr: 12345679"
+  qualifications: "Data Science (MA, 2. Semester)"
+  email: ulbrich.patrick@fh-swf.de
+  
+- familyname: Metzner
+  othernames: Hendrik
+  address: "MatNr: 12345679"
+  qualifications: "Data Science (MA, 2. Semester)"
+  email: metzner.hendrik@fh-swf.de
+
+- familyname: Fenske
+  othernames: Marvin
+  address: "MatNr: 12345679"
+  qualifications: "Data Science (MA, 2. Semester)"
+  email: fenske.marvin@fh-swf.de
+
+- familyname: Eker
+  othernames: Sinan
+  address: "MatNr: 12345679"
+  qualifications: "Data Science (MA, 2. Semester)"
+  email: eker.sinan@fh-swf.de
+
+- familyname: Alhelal
+  othernames: Omar
+  address: "MatNr: 12345679"
+  qualifications: "Data Science (MA, 2. Semester)"
+  email: alhelal.omar@fh-swf.de
 
 # Language Options
 german: true # German Dummy Text
@@ -66,6 +91,10 @@ library(ggplot2)
 # Datenbankstuktur
 
 # Python-Applikation
+
+# Datenabfrage 
+
+# Datenvisualisierung
 
 # Fazit
 
