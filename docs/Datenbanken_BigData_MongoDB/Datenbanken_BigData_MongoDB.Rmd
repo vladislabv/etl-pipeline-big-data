@@ -92,6 +92,7 @@ library(ggplot2)
 
 # Python-Applikation
 
+
 # Datenabfrage 
 ## Wie Kommen eigentlich die Daten aus der Datenbank?
 Um mit MongoDB zu interagieren, haben wir uns sichergestellt, dass die erforderlichen Bibliotheken Pymongo installiert ist. __PyMongo__ ist das offizielle Treiber-Paket, um MongoDB mit Python anzusteuern.
