@@ -9,14 +9,6 @@ __pycache__/
 # VS-Code
 .vscode
 
-# Project-Specific
-.npm
-docker/mnt/node-red
-docker/mnt/python-listener
-docker/mnt/mongodb
-
-mongodb/.mongodb
-
 # Distribution / packaging
 .Python
 build/
