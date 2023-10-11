@@ -1,0 +1,1068 @@
+[
+    {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "LoadGateways",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "c3ff0679d9bb12a3",
+        "type": "tab",
+        "label": "LoadTags",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "07051d55894d6716",
+        "type": "tab",
+        "label": "LoadMeasures",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "77a09ebf710a8aa8",
+        "type": "mqtt-broker",
+        "name": "mosquitto",
+        "broker": "mosquitto",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "10",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "71a0dec4cefe8d7a",
+        "type": "mongodb",
+        "hostname": "db",
+        "topology": "direct",
+        "connectOptions": "",
+        "port": "27017",
+        "db": "admin",
+        "name": "MongoDB"
+    },
+    {
+        "id": "f424b205cc46bbd5",
+        "type": "key-value-store",
+        "filepath": "checkpoints.json",
+        "namespace": "",
+        "name": "IterationCheckpoints"
+    },
+    {
+        "id": "3cc11d24.ff01a2",
+        "type": "comment",
+        "z": "f6f2187d.f17ca8",
+        "name": "WARNING: please check you have started this container with a volume that is mounted to /data\\n otherwise any flow changes are lost when you redeploy or upgrade the container\\n (e.g. upgrade to a more recent node-red docker image).\\n  If you are using named volumes you can ignore this warning.\\n Double click or see info side panel to learn how to start Node-RED in Docker to save your work",
+        "info": "\nTo start docker with a bind mount volume (-v option), for example:\n\n```\ndocker run -it -p 1880:1880 -v /home/user/node_red_data:/data --name mynodered nodered/node-red\n```\n\nwhere `/home/user/node_red_data` is a directory on your host machine where you want to store your flows.\n\nIf you do not do this then you can experiment and redploy flows, but if you restart or upgrade the container the flows will be disconnected and lost. \n\nThey will still exist in a hidden data volume, which can be recovered using standard docker techniques, but that is much more complex than just starting with a named volume as described above.",
+        "x": 350,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "1894c1bea85b24ac",
+        "type": "http request",
+        "z": "f6f2187d.f17ca8",
+        "name": "List All Gateways",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://rest-api:8080/api/v1/structure/gateway/list",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "other",
+                "keyValue": "accept",
+                "valueType": "other",
+                "valueValue": "application/json"
+            }
+        ],
+        "x": 390,
+        "y": 240,
+        "wires": [
+            [
+                "c471b32e4250b5ef"
+            ]
+        ]
+    },
+    {
+        "id": "e95d078d4720797b",
+        "type": "inject",
+        "z": "f6f2187d.f17ca8",
+        "name": "Run Pipeline",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "45",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 240,
+        "wires": [
+            [
+                "1894c1bea85b24ac"
+            ]
+        ]
+    },
+    {
+        "id": "268ba7b1a99c9bcc",
+        "type": "split",
+        "z": "f6f2187d.f17ca8",
+        "name": "SplitByOne - API Stream",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 890,
+        "y": 240,
+        "wires": [
+            [
+                "269ea579707a9da8"
+            ]
+        ]
+    },
+    {
+        "id": "b080887a71a7d5b8",
+        "type": "mqtt out",
+        "z": "f6f2187d.f17ca8",
+        "name": "PushGateway",
+        "topic": "",
+        "qos": "1",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "77a09ebf710a8aa8",
+        "x": 1640,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "c471b32e4250b5ef",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "msg.payload.gateways",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 640,
+        "y": 240,
+        "wires": [
+            [
+                "268ba7b1a99c9bcc"
+            ]
+        ]
+    },
+    {
+        "id": "269ea579707a9da8",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "NotNullOnly",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nnull"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1130,
+        "y": 240,
+        "wires": [
+            [
+                "ed54608e62fd2324"
+            ]
+        ]
+    },
+    {
+        "id": "ed54608e62fd2324",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "SetDynamicTopic",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "'gateways/'&payload.id",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1350,
+        "y": 240,
+        "wires": [
+            [
+                "b080887a71a7d5b8"
+            ]
+        ]
+    },
+    {
+        "id": "46f888ce57ad8d05",
+        "type": "mongodb out",
+        "z": "f6f2187d.f17ca8",
+        "d": true,
+        "mongodb": "71a0dec4cefe8d7a",
+        "name": "SaveGateway",
+        "collection": "gateways",
+        "payonly": true,
+        "upsert": true,
+        "multi": false,
+        "operation": "insert",
+        "x": 1820,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "8632f95c6e3baaf4",
+        "type": "catch",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "scope": null,
+        "uncaught": false,
+        "x": 140,
+        "y": 400,
+        "wires": [
+            [
+                "a6c2bcb769b743ee"
+            ]
+        ]
+    },
+    {
+        "id": "a6c2bcb769b743ee",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "NotifyErrors",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 330,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "d70c357f529616bd",
+        "type": "mqtt in",
+        "z": "c3ff0679d9bb12a3",
+        "name": "GetGatewayFromTopic",
+        "topic": "gateways/#",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "77a09ebf710a8aa8",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 160,
+        "y": 240,
+        "wires": [
+            [
+                "164a1ecb28d407a9"
+            ]
+        ]
+    },
+    {
+        "id": "97dcd06d640e92d5",
+        "type": "http request",
+        "z": "c3ff0679d9bb12a3",
+        "name": "FetchTagsToEachGateway",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://rest-api:8080/api/v1/structure/tag/list/{{gatewayid}}",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "other",
+                "keyValue": "accept",
+                "valueType": "other",
+                "valueValue": "application/json"
+            }
+        ],
+        "x": 680,
+        "y": 240,
+        "wires": [
+            [
+                "4749e2def5b57d1f"
+            ]
+        ]
+    },
+    {
+        "id": "4749e2def5b57d1f",
+        "type": "switch",
+        "z": "c3ff0679d9bb12a3",
+        "name": "PassNotNullOnly",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nempty"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 1,
+        "x": 970,
+        "y": 240,
+        "wires": [
+            [
+                "4b348a96fff1ea6d"
+            ]
+        ]
+    },
+    {
+        "id": "4b348a96fff1ea6d",
+        "type": "split",
+        "z": "c3ff0679d9bb12a3",
+        "name": "SplitByOne - API Stream",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 1250,
+        "y": 240,
+        "wires": [
+            [
+                "8ed5852783d2aac2"
+            ]
+        ]
+    },
+    {
+        "id": "164a1ecb28d407a9",
+        "type": "change",
+        "z": "c3ff0679d9bb12a3",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "gatewayid",
+                "pt": "msg",
+                "to": "msg.payload.id",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 410,
+        "y": 240,
+        "wires": [
+            [
+                "97dcd06d640e92d5"
+            ]
+        ]
+    },
+    {
+        "id": "8ed5852783d2aac2",
+        "type": "change",
+        "z": "c3ff0679d9bb12a3",
+        "name": "SetDynamicTopic",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "'tags/'&payload.address",
+                "tot": "jsonata"
+            },
+            {
+                "t": "move",
+                "p": "gatewayid",
+                "pt": "msg",
+                "to": "payload.gateway_id",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1530,
+        "y": 240,
+        "wires": [
+            [
+                "b49632276f1078f5"
+            ]
+        ]
+    },
+    {
+        "id": "b49632276f1078f5",
+        "type": "mqtt out",
+        "z": "c3ff0679d9bb12a3",
+        "name": "PushTag",
+        "topic": "",
+        "qos": "1",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "77a09ebf710a8aa8",
+        "x": 1820,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "4adb25be1a3384d6",
+        "type": "mongodb out",
+        "z": "c3ff0679d9bb12a3",
+        "d": true,
+        "mongodb": "71a0dec4cefe8d7a",
+        "name": "SaveTag",
+        "collection": "tags",
+        "payonly": true,
+        "upsert": true,
+        "multi": false,
+        "operation": "insert",
+        "x": 2000,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "853865a210956872",
+        "type": "catch",
+        "z": "c3ff0679d9bb12a3",
+        "name": "",
+        "scope": null,
+        "uncaught": false,
+        "x": 180,
+        "y": 420,
+        "wires": [
+            [
+                "85cc686ee2385ba7"
+            ]
+        ]
+    },
+    {
+        "id": "85cc686ee2385ba7",
+        "type": "debug",
+        "z": "c3ff0679d9bb12a3",
+        "name": "NotifyErrors",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 370,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "e2163cbf95daf318",
+        "type": "mqtt in",
+        "z": "07051d55894d6716",
+        "name": "GetTagFromTopic",
+        "topic": "tags/+",
+        "qos": "1",
+        "datatype": "auto-detect",
+        "broker": "77a09ebf710a8aa8",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 160,
+        "y": 280,
+        "wires": [
+            [
+                "0d1c2c86b0c117ca"
+            ]
+        ]
+    },
+    {
+        "id": "0d1c2c86b0c117ca",
+        "type": "change",
+        "z": "07051d55894d6716",
+        "name": "AssignTagAddress",
+        "rules": [
+            {
+                "t": "set",
+                "p": "tagaddress",
+                "pt": "msg",
+                "to": "payload.address",
+                "tot": "msg",
+                "dc": true
+            },
+            {
+                "t": "set",
+                "p": "gatewayid",
+                "pt": "msg",
+                "to": "payload.gateway_id",
+                "tot": "msg",
+                "dc": true
+            },
+            {
+                "t": "set",
+                "p": "size",
+                "pt": "msg",
+                "to": "10",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 390,
+        "y": 280,
+        "wires": [
+            [
+                "69dd377ec57a4f8c"
+            ]
+        ]
+    },
+    {
+        "id": "4474a53925d11dea",
+        "type": "http request",
+        "z": "07051d55894d6716",
+        "name": "FetchMeasuresRecordedByTag",
+        "method": "GET",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://rest-api:8080/api/v1/acc-data/get/{{tagaddress}}/{{page}}",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "other",
+                "keyValue": "accept",
+                "valueType": "other",
+                "valueValue": "application/json"
+            }
+        ],
+        "x": 1150,
+        "y": 540,
+        "wires": [
+            [
+                "c8cf7d04d046435a"
+            ]
+        ]
+    },
+    {
+        "id": "4587567d0907c786",
+        "type": "split",
+        "z": "07051d55894d6716",
+        "name": "SplitByOne - API Stream",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 2110,
+        "y": 740,
+        "wires": [
+            [
+                "3c41d914498607b7"
+            ]
+        ]
+    },
+    {
+        "id": "3c41d914498607b7",
+        "type": "switch",
+        "z": "07051d55894d6716",
+        "name": "NotNullOnly",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "nnull"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 2350,
+        "y": 740,
+        "wires": [
+            [
+                "caa719eb51c8a152"
+            ]
+        ]
+    },
+    {
+        "id": "81f6af825666bfd0",
+        "type": "change",
+        "z": "07051d55894d6716",
+        "name": "SetMeasuresAndCount",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "msg.payload.measurements",
+                "tot": "jsonata"
+            },
+            {
+                "t": "set",
+                "p": "size",
+                "pt": "msg",
+                "to": "$count(payload)",
+                "tot": "jsonata"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1830,
+        "y": 540,
+        "wires": [
+            [
+                "4587567d0907c786",
+                "cb443c73f63ed78a"
+            ]
+        ]
+    },
+    {
+        "id": "83de809b346e33c6",
+        "type": "json",
+        "z": "07051d55894d6716",
+        "name": "",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 1610,
+        "y": 540,
+        "wires": [
+            [
+                "81f6af825666bfd0"
+            ]
+        ]
+    },
+    {
+        "id": "5347772b9ae063f3",
+        "type": "mqtt out",
+        "z": "07051d55894d6716",
+        "name": "PushMeasure",
+        "topic": "",
+        "qos": "1",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "77a09ebf710a8aa8",
+        "x": 2840,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "caa719eb51c8a152",
+        "type": "change",
+        "z": "07051d55894d6716",
+        "name": "SetDynamicTopic",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "topic&'/measures'",
+                "tot": "jsonata"
+            },
+            {
+                "t": "move",
+                "p": "page",
+                "pt": "msg",
+                "to": "payload.page",
+                "tot": "msg"
+            },
+            {
+                "t": "move",
+                "p": "tagaddress",
+                "pt": "msg",
+                "to": "payload.tag_address",
+                "tot": "msg"
+            },
+            {
+                "t": "move",
+                "p": "gatewayid",
+                "pt": "msg",
+                "to": "payload.gateway_id",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 2570,
+        "y": 740,
+        "wires": [
+            [
+                "5347772b9ae063f3"
+            ]
+        ]
+    },
+    {
+        "id": "144e1a3ea0ab61e4",
+        "type": "catch",
+        "z": "07051d55894d6716",
+        "name": "",
+        "scope": null,
+        "uncaught": false,
+        "x": 140,
+        "y": 440,
+        "wires": [
+            [
+                "76d2f2c7bcac7fac"
+            ]
+        ]
+    },
+    {
+        "id": "76d2f2c7bcac7fac",
+        "type": "debug",
+        "z": "07051d55894d6716",
+        "name": "NotifyErrors",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 390,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "867066f9a0ade44d",
+        "type": "mongodb out",
+        "z": "07051d55894d6716",
+        "d": true,
+        "mongodb": "71a0dec4cefe8d7a",
+        "name": "SaveMeasures",
+        "collection": "measures",
+        "payonly": true,
+        "upsert": true,
+        "multi": false,
+        "operation": "insert",
+        "x": 3020,
+        "y": 800,
+        "wires": []
+    },
+    {
+        "id": "69dd377ec57a4f8c",
+        "type": "key-value-read",
+        "z": "07051d55894d6716",
+        "store": "f424b205cc46bbd5",
+        "key": "tagaddress",
+        "output_key": "page",
+        "name": "ReadCheckpoints",
+        "x": 630,
+        "y": 280,
+        "wires": [
+            [
+                "a03ae77cac835358"
+            ]
+        ]
+    },
+    {
+        "id": "cb443c73f63ed78a",
+        "type": "key-value-write",
+        "z": "07051d55894d6716",
+        "store": "f424b205cc46bbd5",
+        "action": "set",
+        "key": "tagaddress",
+        "keyvalue": "page",
+        "name": "SaveCheckpoint",
+        "x": 2100,
+        "y": 540,
+        "wires": [
+            [
+                "a5d5f95903466945"
+            ]
+        ]
+    },
+    {
+        "id": "a03ae77cac835358",
+        "type": "switch",
+        "z": "07051d55894d6716",
+        "name": "Check If Null",
+        "property": "page",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "null"
+            },
+            {
+                "t": "nnull"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 830,
+        "y": 280,
+        "wires": [
+            [
+                "6d9236bf66a666aa"
+            ],
+            [
+                "45f8d086a2eee302"
+            ]
+        ]
+    },
+    {
+        "id": "6d9236bf66a666aa",
+        "type": "change",
+        "z": "07051d55894d6716",
+        "name": "Set init page",
+        "rules": [
+            {
+                "t": "set",
+                "p": "page",
+                "pt": "msg",
+                "to": "1",
+                "tot": "num"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1190,
+        "y": 260,
+        "wires": [
+            [
+                "362e810328ca0bfa"
+            ]
+        ]
+    },
+    {
+        "id": "45f8d086a2eee302",
+        "type": "change",
+        "z": "07051d55894d6716",
+        "name": "Set page from Key Value Store",
+        "rules": [
+            {
+                "t": "set",
+                "p": "page",
+                "pt": "msg",
+                "to": "$number(page)",
+                "tot": "jsonata",
+                "dc": true
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1120,
+        "y": 340,
+        "wires": [
+            [
+                "b20a3703608bae96"
+            ]
+        ]
+    },
+    {
+        "id": "b20a3703608bae96",
+        "type": "increment",
+        "z": "07051d55894d6716",
+        "name": "IncrementPage",
+        "target": "page",
+        "x": 1380,
+        "y": 300,
+        "wires": [
+            [
+                "362e810328ca0bfa"
+            ]
+        ]
+    },
+    {
+        "id": "362e810328ca0bfa",
+        "type": "loop",
+        "z": "07051d55894d6716",
+        "name": "Loop until size < 10 OR payload is null",
+        "kind": "cond",
+        "count": "",
+        "initial": "1",
+        "step": "1",
+        "condition": "msg.size === 10 && msg.payload",
+        "conditionType": "js",
+        "when": "after",
+        "enumeration": "enum",
+        "enumerationType": "msg",
+        "limit": "",
+        "loopPayload": "loop-keep",
+        "finalPayload": "final-orig",
+        "x": 1730,
+        "y": 260,
+        "wires": [
+            [
+                "ef3b6d9eb393c303"
+            ],
+            [
+                "be932fd6d845e971"
+            ]
+        ]
+    },
+    {
+        "id": "a5d5f95903466945",
+        "type": "increment",
+        "z": "07051d55894d6716",
+        "name": "IncrementPage",
+        "target": "page",
+        "x": 2320,
+        "y": 540,
+        "wires": [
+            [
+                "362e810328ca0bfa"
+            ]
+        ]
+    },
+    {
+        "id": "ef3b6d9eb393c303",
+        "type": "debug",
+        "z": "07051d55894d6716",
+        "name": "Last Page Reached",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": true,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "counter",
+        "x": 2040,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "c8cf7d04d046435a",
+        "type": "switch",
+        "z": "07051d55894d6716",
+        "name": "NotEmptyCheck",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "null"
+            },
+            {
+                "t": "nnull"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1420,
+        "y": 540,
+        "wires": [
+            [
+                "362e810328ca0bfa"
+            ],
+            [
+                "83de809b346e33c6"
+            ]
+        ]
+    },
+    {
+        "id": "be932fd6d845e971",
+        "type": "delay",
+        "z": "07051d55894d6716",
+        "name": "SpeedDownAPI Requests",
+        "pauseType": "random",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "100",
+        "randomLast": "500",
+        "randomUnits": "milliseconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 830,
+        "y": 540,
+        "wires": [
+            [
+                "4474a53925d11dea"
+            ]
+        ]
+    }
+]
