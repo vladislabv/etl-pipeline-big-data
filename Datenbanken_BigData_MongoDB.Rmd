@@ -129,6 +129,58 @@ Die obere Architektur ermöglicht einfache Top Down Abfragen. Die Gateways sind 
 
 # Python-Applikation
 
+Bevor man ins Tiefe geht, muss folgendes erwähnt werden:
+
+* Um sensible Daten zu schützen, wie z.B. Zugangsdaten für eine Datenbank, werden diese in einer separaten Datei gespeichert und per `python-dotenv` package aufgerufen. Dabei kommen solche Funktionen, wie `os.getenv()` oder `os.environ.get()` zur Hilfe.
+
+* Dadurch die Ruuvi-API eine REST-API Architektur nutzt, wurde es entschieden, für GET-Abfragen eine python-Package `requests` zu verwenden.
+
+* Die Applikation wurde als einen Python Module geschrieben, so kann es sehr leich in einen größeren Projekt integriert werden.
+
+* Die Daten werden syncron (bzw. sequentiell) in eine MongoDB (shared) Cluster hochgeladen, die eine Speicherbegrenzung von 512 MBs hat, und zwar mithilfe der `pymongo` python-Package.
+
+* Das Neustarten von der Python-Applikation bereinigt die Datenbank mit allen bevor gesammelten Daten.
+
+Der ganze Modul besteht aus folgende Python-Dateien:
+
+**api.py**
+
+Hier werden die ganzen Funktonen definiert, die zur Datenextrahierung aus der API benutzt werden.
+
+Dabei müssen die wichtigsten Annahmen bzw. Methoden zur Datenextrhierung erwähnt werden:
+
+1. MongoDB kann leider keine Nanosekunden, deswegen werden diese abgeschnitten, um einen String-Timestamp in einen DateTime-Timestamp überführen zu können. Das betrifft Felder "last_contact" bei Tags und Gateways, und "recorded_time" bei Measurements.
+
+2. Bei der Pagination über Measurements muss sichergestellt werden, dass man bei einem Tag nicht x-mal über die gleiche Seite iteriert, dafür müssen die Checkpoints zwichengespeichert werden. Bei der Pagination wird den Progress in die Measurements-Dokumenten mitgeschrieben, was in Zusammenhang mit einer zugehörigen Tag-Adresse eine robuste Methode zur Speicherung der Checkpoints anbietet.
+
+3. Bei der Pagination wird eine Annahme getroffen, dass es unendlich iteriert wird, bis man eine auf eine Seite mit Measurements stößt, wo es weniger als der zugelassene Maximum angezeigt wird (< 10).
+
+**dataloader.py**
+
+Es wird grundsätzlich eine While-Schleife wird verwendet, um alle historische Änderungen von Gateways und Tags zu tracken.
+
+1. Während eines While-Zykles wird zuerst den Endpoint "/structure/gateway/list" abgefragt, so bekommt man eine Liste aus Gateways, die dann weiterverarbeitet werden.
+2. Für jeden Gateway wird es iteriert und dabei pro Iteration werden zwei Tasks erledigt
+
+  1. Es wird zuerst einen Python Dictionary verformt, der 1 zu 1, wie in der Datenbank-Schema für MongoDB aussieht.
+  2. Für jeden gateway ID wird eine weiter API GET-Abfrage verformt, die eine Liste aus den zugehörigen Tags zurückgibt.
+
+3. Es kommt zu einer weiteren For-Scheife für Tags, diese werden dann zuerst für MongoDB Import vorbereitet wie vorher die Gateways. Hier wird werden die Tag-Addressen in eine Liste hinzugefügt, die endlich bei einem Gateway in der MongoDB Collection auftaucht. Bevor den Tag endlich in die Collection gespeichert wird, wird es auf die Funktion `updateInsert()` zugegriffen, um die Dopplungen beim Speichern zu vermeiden.
+
+4. Dann gibt es die 3. Stufe von der For-Schleife, wobei es eine GET-Abfrage für Measurements zusammengestellt wird. Die zurückgegebenen Measurements werden für die Speicherung in die Datenbank wie vorher vorbereitet und mithilfe von `updateInsert`-Funktionen in die zugehörige Collection gespeichert.
+
+**update.py**
+
+Beinhaltet alle Hilfsfunktionen, die mit einer MongoDB-Datebank mithilfe von `pymongo`-Package interragieren.
+
+Die Datei beinhaltet verschiedene Funktionen, die aber folgende Funkionalität am Ende erlauben:
+
+* `getLastPageNumber()` -> gibt eine aktuelle Seitennumer für den jeweiligen Tag Id, der ín die Funktion übergeben wurde. Das wird intern benötigt, um die Pagination über Measurements steuern zu können.
+
+* `checkLastTag()` -> prüft ob der übergebene Tag von einem vorher gespeicherten Tag in der Collection "Tags" unterscheidet. Falls es der Fall ist, wird dieser in die Datenbank gespeichert, falls es keine Änderung für den Tag gab, wird es verworfen, somit werden Duplikaten vermeidet.
+
+* `updateInsert()` -> eine Funktion, die unmitterlbar einen übergebenen Dictionary in eine gegebene Collection speichert.
+
 # Datenabfrage
 
 Wie Kommen eigentlich die Daten aus der Datenbank?
