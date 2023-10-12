@@ -197,6 +197,62 @@ In der Darstellung \@ref(fig:avg-time-gateway) ist ebenfalls die Datengenerierun
 
 Dieses Jupyter Notebook enthält die Abfragen zu den entsprechenden Abfrage-Visualisierungen sowie aufgrund der Darstellung \@ref(fig:highest-interest) und \@ref(fig:avg-time-gateway) eine Untersuchung der Datengenerierung.
 
+**api.py**
+
+**dataloader.py**
+
+**update.py**
+
+\newpage
+
+# Appendix - Eigenleistung
+
+**Vladislav Stasenko**
+* Auswertungsteil Python-Applikation
+* Darstellung Datenbankschema und Dokumentation unter *https://dbdocs.io/stasenko_vladislav/new-database-schema-mongodb?view=table_structure*
+* Indexplanung und Validation
+* Anhang Dataloader.py
+* Anhang api.py
+* Schema-Design Datenbank
+* Festlegung Anwendungsfälle
+
+\
+**Hendrik Metzner**
+* Auswertungsteil Fazit, Challenges und Lessons Learned
+* Anhang Dataloader.py
+* Anhang api.py
+* Anhang update.py
+* Schema-Design Datenbank
+* Festlegung Anwendungsfälle
+
+\
+**Marvin Fenske**
+* Auswertungsteil Anwendungsfall
+* Auswertungsteil Datenbankstruktur
+* Anhang update.py
+* Schema-Design Datenbank
+* Festlegung Anwendungsfälle
+
+\
+**Sinan Eker**
+* Auswertungsteil Einführung und Datenbeschreibung
+* Erstellung MongoDB Cloud free Tier und individuelle User
+* Schema-Design Datenbank
+* Festlegung Anwendungsfälle
+
+\
+**Omar Alhelal**
+* Auswertungsteil Datenabfrage
+* Schema-Design Datenbank
+* Festlegung Anwendungsfälle
+
+\
+**Patrick Adrian Ulbrich**
+* Auswertungsteil Datenvisualisierung
+* Anhang mongodb_queries.ipynb
+* Schema-Design Datenbank
+* Festlegung Anwendungsfälle
+
 \newpage
 
 # Technical Appendix {-}
