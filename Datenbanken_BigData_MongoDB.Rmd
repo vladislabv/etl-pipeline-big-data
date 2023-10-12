@@ -100,7 +100,7 @@ Um die Datenbank mit MongoDB zu erstellen wurde zunächst der Use Case betrachte
 Innerhalb der Tabelle tags befinden sich Informationen über die einzelnen Tags. Dazu zählt die ID, der Name, das Datum der letzten Verbindung, ein Flag, das zu erkennen gibt, ob der Tag online ist sowie die KonfigurationsID.
 Zuletzt werden die Messwerte der Einkaufswagen mit eigener ID, einem Timestamp und der Tag ID als Fremdschlüssel in measures gespeichert. 
  
-```{r most-customers, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Momentaufnahme Kunden je Abteilung', out.width='1\\linewidth', fig.pos='H'}
+```{r database, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Datenbankstruktur', out.width='1\\linewidth', fig.pos='H'}
 knitr::include_graphics("./fig/Struktur.png")
 ```
 
