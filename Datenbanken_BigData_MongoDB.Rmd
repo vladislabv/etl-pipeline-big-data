@@ -210,8 +210,23 @@ In der Darstellung \@ref(fig:avg-time-gateway) ist ebenfalls die Datengenerierun
 # Fazit
 
 ## Challenges
+Während der Entwicklung ergaben sich verschiedene Herausforderungen. Auf diese Herausforderungen, die resultierende Lösung und deren Vorteile wird im folgenden Abschnitt eingegangen.
 
-## Lessons Learned
+### Zyklische Abfrage der Daten
+Ziel des Programms sollte es sein, dass Messwerte nicht verloren gehen. Es konnte jedoch zu Beginn der Entwicklung nicht abgefragt werden, welches der letzte gespeicherte Messwert zu einem bestimmten Tag war, da die Messwerte nicht zeitlich fortlaufend hintereinander geschrieben wurden. Es gab also keinen Anhaltspunkt, wie viele Messwerte bereits eingelesen wurden. Aufgrund der Masse an Daten konnten bei einem Neustart auch nicht alle Messwerte neu abgefragt und gespeichert werden. Als Lösungsansatz wurde gewählt, dass die Seite, auf der ein Messwert erfasst wurde, mit in der Datenbank hinterlegt wird. Bei der Abfrage der Messwerte zu einem bestimmten Tag wird als erstes die höchste bereits eingelesene Seite aus der Datenbank abgefragt und anschließend die nächsten 50 Seiten eingelesen. Die Begrenzung auf 50 Seiten pro Tag wurde gewählt, damit die Tags in einer höheren Frequenz durchlaufen werden und so eine eventuelle Änderung der Gateways zu den Tags öfter abgefragt werden kann. Des Weiteren wird nur jede volle Seite importiert, damit keine Messwerte doppelt erfasst werden. Da die letzte Seite mit Messwerten zu jedem Tag mit abgespeichert wird, kann das Programm als Cron-Job genutzt werden und so in regelmäßigen Abständen die Daten in die Datenbank schreiben.
+
+### Historische Zuordnung der Tags zu den Gateways {#historical}
+In der ersten Version des Programms wurde immer nur der aktuelle Zustand des Tags gespeichert. Das bedeutet, dass die Zuordnung der Tags zu den Gateways mit jedem Import überschrieben wurde. Es war außerdem so nicht möglich eine Historie über den Verlauf der Tags über die verschiedenen Gateways oder die Konfigurationen in zeitlichem Verlauf zu speichern. Dafür wurden zwei verschiedene Lösungsarten gefunden. Zum einen kann eine Historie der Tags angelegt werden. Dies wird erreicht indem der Importzeitpunkt des Tags in die Datenbank gespeichert wird. Mit diesen wurden auch die jeweiligen Einstellungen zu den Tags gespeichert. Über eine Sortierung der Tags nach dem Einfüge-Datum kann der Verlauf verfolgt werden. Die weitere Lösung bestand darin die Gateway-ID und die Tag Adresse zu jedem Messwert zu speichern. Dafür wurde eine Kombination aus beiden Ansätzen gewählt. So werden einerseits die historischen Einstellungen der Tags mit einem Einfüge-Datum gespeichert, als auch die Abfrage der Zuordnung der Tags zu Gateways beschleunigt. 
+
+### Nanosekunden in der API
+Da die API in der Programmiersprache Go programmiert wurde, werden Timestamps der API mit Nanosekunden zurückgegeben. MongoDB nutzt zur Speicherung des Timestamp Datentyps 64 Bit [@MongoBSON]. Es ist also nur möglich die Microsekunden mit abzuspeichern. Als Lösungsweg ergaben sich zwei Ansätze. Zu einen ergab sich die Möglichkeit den Timestamp als String in der Datenbank abzulegen, oder zum anderen die Nanosekunden vor dem Cast vom String in einen Timestamp abzuschneiden. Da die Nanosekunden nicht unbedingt zum Erreichen unseres Anwendungsfalles nötig sind, wurde die zweite Möglichkeit umgesetzt, um einerseits Speicherplatz zu sparen und andererseits die Abfragegeschwindigkeit zu erhöhen.
+
+\newpage
+
+## Lessons Learned and Future Changes
+Wie bereits in [Challenges](#historical) erwähnt, änderte sich während der Entwicklung mehrfach der Anwendungsfall oder die Voraussetzungen an das Programm. Dieses zog eine Änderung der Datenbankstruktur, der Validation und der Indexe nach sich. Es sollte für zukünftige Projekte mit dokumentenorientierten Datenbanken bei der Planung der Struktur der Anwendungsfall im Vordergrund stehen und weniger die Daten an sich wie etwa bei relationalen Datenbanken. Daten, die zusammen abgefragt werden, sollten auch zusammen gespeichert werden.
+Des Weiteren sollte sich bei der Planung genau mit der Art der Daten auseinandergesetzt werden. Im Falle der Messwerte konnte der Vorteil der von MongoDB bereitgestellten Time-Series Collection genutzt werden. Mit dieser Art Collection ließ sich Speicherplatz sparen und ebenfalls die Abfragen beschleunigen. Es ist jedoch wichtig zu erwähnen, dass unser Programm laut [@MongoTimeSeries]  hätte beschleunigt werden können, wenn wir von der insert_one Methode in pymongo auf eine Batch Verarbeitung mit insert_many gewechselt wären. Der Vorteil hätte durch die seitenweise Speicherung der Messwerte genutzt werden können.
+
 
 \newpage
 
