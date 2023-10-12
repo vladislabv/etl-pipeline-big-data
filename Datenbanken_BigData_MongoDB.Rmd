@@ -247,6 +247,7 @@ Dieses Jupyter Notebook enthält die Abfragen zu den entsprechenden Abfrage-Visu
 # Appendix - Eigenleistung
 
 **Vladislav Stasenko**
+
 * Auswertungsteil Python-Applikation
 * Darstellung Datenbankschema und Dokumentation unter *https://dbdocs.io/stasenko_vladislav/new-database-schema-mongodb?view=table_structure*
 * Indexplanung und Validation
@@ -257,6 +258,7 @@ Dieses Jupyter Notebook enthält die Abfragen zu den entsprechenden Abfrage-Visu
 
 \
 **Hendrik Metzner**
+
 * Auswertungsteil Fazit, Challenges und Lessons Learned
 * Anhang Dataloader.py
 * Anhang api.py
@@ -266,6 +268,7 @@ Dieses Jupyter Notebook enthält die Abfragen zu den entsprechenden Abfrage-Visu
 
 \
 **Marvin Fenske**
+
 * Auswertungsteil Anwendungsfall
 * Auswertungsteil Datenbankstruktur
 * Anhang update.py
@@ -274,6 +277,7 @@ Dieses Jupyter Notebook enthält die Abfragen zu den entsprechenden Abfrage-Visu
 
 \
 **Sinan Eker**
+
 * Auswertungsteil Einführung und Datenbeschreibung
 * Erstellung MongoDB Cloud free Tier und individuelle User
 * Schema-Design Datenbank
@@ -281,12 +285,14 @@ Dieses Jupyter Notebook enthält die Abfragen zu den entsprechenden Abfrage-Visu
 
 \
 **Omar Alhelal**
+
 * Auswertungsteil Datenabfrage
 * Schema-Design Datenbank
 * Festlegung Anwendungsfälle
 
 \
 **Patrick Adrian Ulbrich**
+
 * Auswertungsteil Datenvisualisierung
 * Anhang mongodb_queries.ipynb
 * Schema-Design Datenbank
