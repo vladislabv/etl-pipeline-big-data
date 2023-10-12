@@ -1,5 +1,4 @@
 import os
-import requests
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 
@@ -30,7 +29,7 @@ def get_tags(session, gateway_id):
 
 
 def stop_iteration(elem, stop_at):
-   #Hier muss ab dem punkt abgeschnitten werden!
+   #Drop nanoseconds since they are not supported by mongoDB
    return datetime.strptime(elem['recorded_time'][:-4], "%Y-%m-%dT%H:%M:%S.%f").replace(tzinfo=timezone.utc) < stop_at.replace(tzinfo=timezone.utc)
 
 
@@ -66,42 +65,3 @@ def get_measurements(session, tag_ip6, start_page=1, stop_at=(datetime.now()-tim
                                 yield measurement
                     else:
                         nextTag = True
-
-
-def get_configs(session: requests.Session, gateway_ids: list, obj: str = "gateway", tag_ip6s = None):
-    if obj not in ["gateway", "tag"]:
-        raise ValueError("obj must be either 'gateway' or 'tag'")
-    
-    if not isinstance(gateway_ids, list):
-        raise ValueError("gateway_ids must be a list")
-    
-    if obj == "tag":
-        if not isinstance(tag_ip6s, list):
-            raise ValueError("tag_ip6s must be a list")
-        if not len(gateway_ids) == len(tag_ip6s):
-            raise ValueError("Length of gateway_ids and tag_ip6s must be equal")     
-
-        for id, ip6 in zip(gateway_ids, tag_ip6s):
-            r = session.get(f'{API}/config/get/{id}/{ip6}')
-            yield r.json()['config']
-    else:
-        for id in gateway_ids:
-            r = session.get(f'{API}/config/get/{id}')
-            yield r.json()['config']
-
-
-def get_configssing(session: requests.Session, gateway_id, tag_ipv6= ''):
-    if gateway_id == '':
-        raise ValueError('gateway_id cant be empty')
-
-    if tag_ipv6 == '':
-        r = session.get(f'{API}/config/get/{gateway_id}')
-        if 'config' in r.json():
-            return r.json()['config']  
-    else:
-        r = session.get(f'{API}/config/get/{gateway_id}/{tag_ipv6}')
-        if 'config' in r.json():
-            return r.json()['config']
-    
-    return []
-        

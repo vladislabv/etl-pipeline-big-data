@@ -1,5 +1,4 @@
 import os
-import time
 import pymongo
 from dotenv import load_dotenv
 
@@ -42,8 +41,6 @@ def getLastPageNumber(tag_id):
   return max_page
 
 def checkLastTag(currentTag):
-
-  #currentTag.pop('last_contact')
   result = coltags.find_one({'address': currentTag['address']}, sort=[('inserttimestamp', -1)])
   
   if not result:
@@ -67,11 +64,6 @@ def updateInsert (collection, json):
     x = colgateways.update_one(query, value, upsert = True)
 
   if collection == "tags":
-    #query = {'_id': json['_id']}
-    #value = {'$set': json}
-
-    #x = coltags.update_one(query, value, upsert = True)
-    #json['inserttimestamp'] = time.time()
     x = coltags.insert_one(json)
 
   if collection == "measures":
