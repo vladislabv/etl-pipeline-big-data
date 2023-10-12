@@ -81,69 +81,94 @@ library(fhswf)
 library(ggplot2)
 ```
 
+# Einleitung
 
-# Einführung
+# Einführung in MongoDB
+
+MongoDB ist eine Open-Source-NoSQL-Datenbank, die auf nichtrelationalen Prinzipien aufbaut. Diese Datenbank ist flexibel und kann sowohl strukturierte, als auch unstrukturierte Daten verarbeiten. Sie ist dokumentenorientiert und in einer unstrukturierten Query Language implementiert.
+
+Die Besonderheit von MongoDB liegt in der hohen Flexibilität. Das System ermöglicht das Speichern und Verarbeiten von Daten in verschiedenen Formaten. Im Gegensatz zu den herkömmlichen relationalen Datenbanken kann MongoDB auch größere Datenmengen problemlos verarbeiten.
+
+Ein weiteres Merkmal von MongoDB ist das BSON-Format (Binary JSON), eine binäre Variante von JSON (JavaScript Object Notation). BSON bietet einen erweiterten Bereich von Datentypen an und ist damit besonders vielseitig.[@PureStorage]
+
+## Datenbankstruktur
+
+Im Gegensatz zu den üblichen relationalen SQL-Datenbanken arbeitet MongoDB zur Datenspeicherung nicht mit Tabellen und Spalten, sondern mit Collections und Documents.
+
+Documents in MongoDB bestehen aus Wert-Schlüssel-Paaren und bilden die Grundlage für die Datenspeicherung. Darüber hinaus beinhaltet MongoDB Collections, die wiederum diese Documents speichern. Jedes dieser Dokumente ist einzigartig und kann eine beliebige Anzahl von Feldern enthalten. Der Aufbau eines Dokuments wird durch den Aufbau der Klassen und Objekte bestimmt, welche vom Entwickler in der verwendeten Programmiersprache definiert werden. MongoDB unterstützt mehrere Programmiersprachen, wie z. B. C, C++, C#, Java, Python, Ruby und Swift. [@DataScientest]
+
+## Funktion und Nutzen
+
+MongoDB bietet Organisationen eine umfangreiche Auswahl an Einsatzmöglichkeiten:
+
+**Datenspeicherung:** MongoDB ist hochflexibel und kann sowohl große strukturierte als auch unstrukturierte Datensätze verarbeiten. Die Skalierbarkeit der Datenbank erstreckt sich auf vertikale und horizontale Ebenen. Abfragen können nach Feldern, Bereichen und Ausdrücken erfolgen.
+
+**Komplexe Datenstrukturen**: Mit MongoDB lassen sich komplexe Datenstrukturen darstellen. Das Dokumentenmodell unterstützt die Verschachtelung von Dokumenten, was vor allem bei der Abbildung hierarchischer Strukturen hilfreich sein kann. Darüber hinaus lassen sich mit MongoDB variable Datenstrukturen leicht abbilden.
+
+**Lastenausgleich**: MongoDB kann auf mehreren Servern ausgeführt werden, womit eine dynamische Lastverteilung möglich ist. Dadurch wird die Verfügbarkeit der Datenbank erhöht, was vor allem in Umgebungen mit erhöhtem Datenverkehr und hohem Arbeitsaufkommen von Nutzen ist.
+
+**Datenintegration**: MongoDB eignet sich ideal für die Integration von Daten in Anwendungen, einschließlich Hybrid- und Multi-Cloud-Anwendungen. Sie können Daten aus unterschiedlichen Quellen zusammenführen.
+
+Diese Anpassungsfähigkeit und Skalierbarkeit machen MongoDB zu einer idealen Lösung für Organisationen, die komplexe Datenstrukturen speichern, verarbeiten und verwalten müssen. [@Alexander]
 
 ## Datenbeschreibung
 
 # Anwendungsfall
 
-Im Rahmen dieser Projektarbeit werden die von den Ruuvy Tags gelieferten Daten im Umfeld eines Supermarkts betrachtet. Gateways sind dabei über verschiedene Abteilungen (z.B.  die Frischfleisch-, Obst- & Gemüse-, Tiefkühl- oder Aktionswarenabteilung) verteilt. Die von den Tags gesendeten Werte werden dabei als Werte der entsprechenden Abteilung gewertet. Die Ruuvy Tags werden an allen Einkaufswagen angebracht. Sie liefern Daten über die Beschleunigung der Einkaufswagen, die Temperatur, Luftfeuchtigkeit und den Luftdruck in der Abteilung sowie den Ladezustand der eigenen Batterie. Die Beschleunigung der Einkaufswagen kann als Indikator für die Bewegung eines Einkaufswagens gewertet werden da Menschen in der Regel nicht in der Lage sind, ein Objekt mit einer genau gleichbleibenden Geschwindigkeit (also ohne Beschleunigung) zu bewegen. Eine Beschleunigung von 0 m/s^2 bedeutet demnach, dass der Einkaufswagen steht.
-Zielsetzung im Rahmen dieses Projektes ist es, anhand der Beschleunigungsdaten der Einkaufswägen zu erkennen, welche Abteilungen im Markt viele Kunden anziehen. Dabei wird ein häufiges Beschleunigen innerhalb einer Abteilung eines Wagens als Interesse an mehreren Produkten betrachtet. Gibt es viele verschiedene Tags, die sich in einer Abteilung parallel aufhalten ist diese vermutlich stark frequentiert und von Interesse für die Kunden. Die Produkte müssten entsprechend häufiger nachgefüllt werden. Gibt es bei Aktionspreisen Schwankungen zu einem regulären Verhalten können kurzfristig zudem Aussagen über den Erfolg des Angebotes erhalten werden. Zudem können Informationen darüber, wie schnell ein Tag die Gateways wechselt, für die Planung zeigen, wie lange sich Kunden in den verschiedenen Abteilungen aufhalten.
-Eine Auswertung anderer Daten des Ruuvy Tags wie die Temperatur wäre denkbar, ist aber nicht Teil dieses Projekts.
-
-
+Im Rahmen dieser Projektarbeit werden die von den Ruuvy Tags gelieferten Daten im Umfeld eines Supermarkts betrachtet. Gateways sind dabei über verschiedene Abteilungen (z.B. die Frischfleisch-, Obst- & Gemüse-, Tiefkühl- oder Aktionswarenabteilung) verteilt. Die von den Tags gesendeten Werte werden dabei als Werte der entsprechenden Abteilung gewertet. Die Ruuvy Tags werden an allen Einkaufswagen angebracht. Sie liefern Daten über die Beschleunigung der Einkaufswagen, die Temperatur, Luftfeuchtigkeit und den Luftdruck in der Abteilung sowie den Ladezustand der eigenen Batterie. Die Beschleunigung der Einkaufswagen kann als Indikator für die Bewegung eines Einkaufswagens gewertet werden da Menschen in der Regel nicht in der Lage sind, ein Objekt mit einer genau gleichbleibenden Geschwindigkeit (also ohne Beschleunigung) zu bewegen. Eine Beschleunigung von 0 m/s\^2 bedeutet demnach, dass der Einkaufswagen steht. Zielsetzung im Rahmen dieses Projektes ist es, anhand der Beschleunigungsdaten der Einkaufswägen zu erkennen, welche Abteilungen im Markt viele Kunden anziehen. Dabei wird ein häufiges Beschleunigen innerhalb einer Abteilung eines Wagens als Interesse an mehreren Produkten betrachtet. Gibt es viele verschiedene Tags, die sich in einer Abteilung parallel aufhalten ist diese vermutlich stark frequentiert und von Interesse für die Kunden. Die Produkte müssten entsprechend häufiger nachgefüllt werden. Gibt es bei Aktionspreisen Schwankungen zu einem regulären Verhalten können kurzfristig zudem Aussagen über den Erfolg des Angebotes erhalten werden. Zudem können Informationen darüber, wie schnell ein Tag die Gateways wechselt, für die Planung zeigen, wie lange sich Kunden in den verschiedenen Abteilungen aufhalten. Eine Auswertung anderer Daten des Ruuvy Tags wie die Temperatur wäre denkbar, ist aber nicht Teil dieses Projekts.
 
 # Datenbankstuktur
 
-Um die Datenbank mit MongoDB zu erstellen wurde zunächst der Use Case betrachtet. Im Zentrum der Abfrage stehen dabei immer die Gateways (Abteilungen des Supermarktes). Tags können dabei zwischen den Gateways wechseln und an verschiedenen Tags unterschiedliche Messergebnisse liefern. Aus diesem Grund wurde sich hier für eine Struktur mit vier Tabellen entschieden. Diese sind die Tabellen gateways, tags, measures und configs. In gateways befinden sich Informationen über die einzelnen Gateways (wie beispielsweise die IP Addresse und das Datum der letzten Verbindung). Außerdem beinhaltet diese Tabelle jeweils ein Array, in dem sich die Tag ID‘s befinden, die ihm zugeordnet sind sowie der eines mit den Config ID’s. Sie verweisen als Fremdschlüssel auf die Tabellen tags und configs. Es wurde sich dagegen entschieden, diese Tabellen in Gateways zu embedden. Grund dafür ist die ansteigende Speichergröße. Im Rahmen dieses Projekts wird nur eine kostenlose Version von MongoDB über MongoDB Atlas verwendet. Da das Einbetten der Tabellen deren Größe stark wachsen lässt wurde sich entschieden, auf eine bessere Abfragegeschwindigkeit zugunsten des Speichers zu verzichten. Zusätzlich wird die Tabelle configs verwendet, um sowohl für die Gateways als auch für die Tags unterschiedliche Konfigurationsdaten zu speichern. Diese müsste demnach alternativ in beide Tabellen (gateways und tags) embedded werden.
-Innerhalb der Tabelle tags befinden sich Informationen über die einzelnen Tags. Dazu zählt die ID, der Name, das Datum der letzten Verbindung, ein Flag, das zu erkennen gibt, ob der Tag online ist sowie die KonfigurationsID.
-Zuletzt werden die Messwerte der Einkaufswagen mit eigener ID, einem Timestamp und der Tag ID als Fremdschlüssel in measures gespeichert. 
- 
+Um die Datenbank mit MongoDB zu erstellen wurde zunächst der Use Case betrachtet. Im Zentrum der Abfrage stehen dabei immer die Gateways (Abteilungen des Supermarktes). Tags können dabei zwischen den Gateways wechseln und an verschiedenen Tags unterschiedliche Messergebnisse liefern. Aus diesem Grund wurde sich hier für eine Struktur mit vier Tabellen entschieden. Diese sind die Tabellen gateways, tags, measures und configs. In gateways befinden sich Informationen über die einzelnen Gateways (wie beispielsweise die IP Addresse und das Datum der letzten Verbindung). Außerdem beinhaltet diese Tabelle jeweils ein Array, in dem sich die Tag ID's befinden, die ihm zugeordnet sind sowie der eines mit den Config ID's. Sie verweisen als Fremdschlüssel auf die Tabellen tags und configs. Es wurde sich dagegen entschieden, diese Tabellen in Gateways zu embedden. Grund dafür ist die ansteigende Speichergröße. Im Rahmen dieses Projekts wird nur eine kostenlose Version von MongoDB über MongoDB Atlas verwendet. Da das Einbetten der Tabellen deren Größe stark wachsen lässt wurde sich entschieden, auf eine bessere Abfragegeschwindigkeit zugunsten des Speichers zu verzichten. Zusätzlich wird die Tabelle configs verwendet, um sowohl für die Gateways als auch für die Tags unterschiedliche Konfigurationsdaten zu speichern. Diese müsste demnach alternativ in beide Tabellen (gateways und tags) embedded werden. Innerhalb der Tabelle tags befinden sich Informationen über die einzelnen Tags. Dazu zählt die ID, der Name, das Datum der letzten Verbindung, ein Flag, das zu erkennen gibt, ob der Tag online ist sowie die KonfigurationsID. Zuletzt werden die Messwerte der Einkaufswagen mit eigener ID, einem Timestamp und der Tag ID als Fremdschlüssel in measures gespeichert.
+
 ```{r most-customers, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Momentaufnahme Kunden je Abteilung', out.width='1\\linewidth', fig.pos='H'}
 knitr::include_graphics("./fig/Struktur.png")
 ```
 
 Die obere Architektur ermöglicht einfache Top Down Abfragen. Die Gateways sind dabei immer Ziel der Abfragen und können per Query, je nach Bedarf, runter auf Tag- oder Measures Ebene. Beispiele aus dem Use Case für eine Abfrage auf Tag Ebene währe dabei, wie viele Einkaufswagen sich in einer Abteilung befinden. Auf Measures Ebene stände die Frage, wie oft Einkaufswagen innerhalb einer Abteilung beschleunigt werden.
 
-
 # Python-Applikation
 
-# Datenabfrage 
+# Datenabfrage
 
 ## Wie Kommen eigentlich die Daten aus der Datenbank?
-Um mit MongoDB zu interagieren, haben wir uns sichergestellt, dass die erforderlichen Bibliotheken Pymongo installiert ist. __PyMongo__ ist das offizielle Treiber-Paket, um MongoDB mit Python anzusteuern.
 
-```python
+Um mit MongoDB zu interagieren, haben wir uns sichergestellt, dass die erforderlichen Bibliotheken Pymongo installiert ist. **PyMongo** ist das offizielle Treiber-Paket, um MongoDB mit Python anzusteuern.
+
+``` python
 import pymongo
 ```
+
 Danach stellten wir eine Verbindung zur MongoDB-Datenbank her.
 
-```python
+``` python
 client = pymongo.MongoClient("mongodb://localhost:27017/")
 db = client['MongoDB-Database']
 ```
 
 In MongoDB werden die Daten in sogenannten "Collections" (Sammlungen) organisiert und gespeichert. Eine Collection ist eine Gruppe von Dokumenten, die ähnliche oder verwandte Daten enthalten. In unserem Fall sind es drei Sammlungen
-```python
+
+``` python
 gateways_collection = db["measures"]
 measures_collection = db["gateway"]
 tags_collection = db["tags"]
 ```
 
 Um sie abzufragen:
-```python
+
+``` python
 documents_to_find = {}
 one_document = gateways_collection.find_one(documents_to_find)
 print(one_document)
 ```
+
 Nachdem wir gesehen haben wie die Verbindung und Integration zwischen MongoDB und Python funktioniert, stellen wir vier verschiedene Abfragebeispiele zum Verständnis der Anwendung der Datenbank und ihrer Funktionsweise. Sie dienen als klare Referenz für die Verwendung von Abfragen und können dazu beitragen, Missverständnisse oder potenzielle Fehler in der Anwendung zu vermeiden. Dabei werden nicht nur Abfragebeispiele dargestellt sondern auch visualisiert
 
 Am Anfang defenieren wir die Aggregation-Stages als Zeichenkette(Strings), da die Daten in MongoDB in BSON-Format gespeichert sind.
 
-<div class="alert alert-block alert-success">
+::: {.alert .alert-block .alert-success}
 <b>Zur Info:</b> BSON ist ein binäres, JSON-ähnliches Format, das zur Speicherung strukturierter Daten verwendet wird. Im Gegensatz zu JSON unterstützt BSON jedoch einige zusätzliche Datentypen und Features, die für die Speicherung in einer MongoDB nützlich sind.
-</div>
+:::
 
 Sobald wir alle Stages haben, konstruieren und führen wir die Aggregationsabfrage aus.
 
@@ -151,9 +176,9 @@ Sobald wir alle Stages haben, konstruieren und führen wir die Aggregationsabfra
 
 # Datenvisualisierung
 
-Im Rahmen des festgelegten Use Cases wurden 4 zu beantwortende Fragen definiert. Alle 4 Fragen werden mit entsprechenden Abbildungen dargestellt. Der Code zum Erzeugen der Darstellungen und die entsprechenden Datenbankabfragen sind in gleicher Reihenfolge als Anhang im Ordner *src* im Notebook *mongodb_queries.ipynb* zu finden. 
+Im Rahmen des festgelegten Use Cases wurden 4 zu beantwortende Fragen definiert. Alle 4 Fragen werden mit entsprechenden Abbildungen dargestellt. Der Code zum Erzeugen der Darstellungen und die entsprechenden Datenbankabfragen sind in gleicher Reihenfolge als Anhang im Ordner *src* im Notebook *mongodb_queries.ipynb* zu finden.
 
-Die erste Abfrage lautete: *In welcher Abteilung halten sich die meisten Kunden auf?* In Bezug auf den Anwendungsfall wurde entsprechend ausgewertet, wie viele Tags mit einem Gateway im Stand der letzten Messung verbunden sind. Die Visualisierung ist in der Darstellung \@ref(fig:most-customers) zu finden. Es ist zu erkennen, dass die Tags nicht gleichverteilt mit den Gateways verbunden sind. Insbesondere fällt ein Gateway auf, welches nur mit einem einzigen Tag zum Zeitpunkt der letzten Messung in Kontakt stand. 
+Die erste Abfrage lautete: *In welcher Abteilung halten sich die meisten Kunden auf?* In Bezug auf den Anwendungsfall wurde entsprechend ausgewertet, wie viele Tags mit einem Gateway im Stand der letzten Messung verbunden sind. Die Visualisierung ist in der Darstellung \@ref(fig:most-customers) zu finden. Es ist zu erkennen, dass die Tags nicht gleichverteilt mit den Gateways verbunden sind. Insbesondere fällt ein Gateway auf, welches nur mit einem einzigen Tag zum Zeitpunkt der letzten Messung in Kontakt stand.
 
 ```{r most-customers, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Momentaufnahme Kunden je Abteilung', out.width='1\\linewidth', fig.pos='H'}
 knitr::include_graphics("./fig/most_customers_now.pdf")
@@ -173,7 +198,7 @@ knitr::include_graphics("./fig/highest_interest.pdf")
 
 Wie in der Darstellung \@ref(fig:highest-interest) zu erkennen, hat die Visualisierung leider keine direkte Aussagekraft. Die Datengenerierung wurde daraufhin genauer untersucht und die Darstellung scheint dem Datengenerierungs-Schema geschuldet zu sein. Es konnten lediglich 200 distinkte Messwerte für den Wert *acc_x* gefunden werden. Alle Werte kamen dabei gleich häufig vor. Die unterschiedliche Anzahl an Messwerten über 200 m/s² je Gateway, wie in Abbildung \@ref(fig:most-crashes) dargestellt, stammt lediglich daraus, dass diese Gateways mehr der 200-Messwerte-Zyklen durchlaufen haben. Im Durchschnitt sind durch diese Datengenerierung aber die Durchschnittswerte für alle Gateways identisch. Eine tiefere Untersuchung der Datengenerierung ist ebenfalls im Notebook *mongodb_queries.ipynb* unter der Überschrift *Untersuchung der Visualisierung von Abfrage 3* zu finden.
 
-Die letzte aufgestellte Frage zur Einschätzung der Abteilungs-Performance war: *Wie lange verbringt ein Kunde durchschnittlich in einer Abteilung?* Zu Beantwortung dieser Frage wurde zunächst die Verbindungszeit eines Tags mit einem Gateway berechnet. Im Anschluss konnte aus diesen Ergebnissen die durchschnittliche Verbindungszeit je Gateway ermittelt werden. Für diese Visualisierung wurden neben den 5 Abteilungen mit dem höchsten Kundeninteresse auch die 5 Abteilungen mit dem niedrigsten Kundeninteresse ausgegeben. Das Ergebnis ist in Darstellung \@ref(fig:avg-time-gateway) zu finden. 
+Die letzte aufgestellte Frage zur Einschätzung der Abteilungs-Performance war: *Wie lange verbringt ein Kunde durchschnittlich in einer Abteilung?* Zu Beantwortung dieser Frage wurde zunächst die Verbindungszeit eines Tags mit einem Gateway berechnet. Im Anschluss konnte aus diesen Ergebnissen die durchschnittliche Verbindungszeit je Gateway ermittelt werden. Für diese Visualisierung wurden neben den 5 Abteilungen mit dem höchsten Kundeninteresse auch die 5 Abteilungen mit dem niedrigsten Kundeninteresse ausgegeben. Das Ergebnis ist in Darstellung \@ref(fig:avg-time-gateway) zu finden.
 
 ```{r avg-time-gateway, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Abteilungen mit höchster und niedrigster Durchschnittszeit', out.width='1\\linewidth', fig.pos='H'}
 knitr::include_graphics("./fig/avg_time_gateway.pdf")
@@ -199,10 +224,9 @@ Dieses Jupyter Notebook enthält die Abfragen zu den entsprechenden Abfrage-Visu
 
 \newpage
 
-# Technical Appendix {-}
+# Technical Appendix {.unnumbered}
 
 ```{r, echo = TRUE}
 Sys.time()
 sessionInfo()
 ```
-
