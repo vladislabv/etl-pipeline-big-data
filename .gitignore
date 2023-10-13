@@ -160,3 +160,4 @@ cython_debug/
 #.idea/
 mongodb_env.py
 output_measures.xlsx
+Datenbanken_BigData_MongoDB.pdf
