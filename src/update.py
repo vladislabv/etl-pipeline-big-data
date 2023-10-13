@@ -2,13 +2,19 @@ import os
 import pymongo
 from dotenv import load_dotenv
 
+#load the .env file
 load_dotenv()
+
+#set the database-parameter
 client = pymongo.MongoClient('mongodb+srv://' + os.getenv('MongoUser') + ':' + os.getenv('MongoPassword') + '@mongodbcluster.n6cun7v.mongodb.net/')
+
+#set the collections
 db = client['MongoDB-Database']
 colgateways = db["gateways"]
 coltags = db["tags"]
 colmeasures = db["measures"]
 
+#delete all data from the database for a newstart test
 def deleteMeasurements():
   colmeasures.delete_many({})
   coltags.delete_many({})
@@ -16,6 +22,7 @@ def deleteMeasurements():
 
   return 1
 
+#get the last added page for a tag from the database
 def getLastPageNumber(tag_id):
   
   max_page = 1
@@ -40,6 +47,7 @@ def getLastPageNumber(tag_id):
       
   return max_page
 
+#check if the tag is already added and if there any changes in the changes return true
 def checkLastTag(currentTag):
   result = coltags.find_one({'address': currentTag['address']}, sort=[('inserttimestamp', -1)])
   
@@ -54,7 +62,7 @@ def checkLastTag(currentTag):
   return tempreturn
 
 
-
+#write the data to the database
 def updateInsert (collection, json):
   
   if collection == "gateways":
@@ -71,5 +79,6 @@ def updateInsert (collection, json):
 
   return x
 
+#close the client connection at the end
 def closeclient() :
   client.close()
