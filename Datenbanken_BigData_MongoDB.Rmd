@@ -47,7 +47,7 @@ author:
 
 # Language Options
 german: true # German Dummy Text
-lang: de-de   # Text Language: en-gb, en-us, de-de
+lang: en-us   # Text Language: en-gb, en-us, de-de
 
 # Indexes
 toc: true     # Table of Contents
@@ -83,7 +83,7 @@ library(ggplot2)
 
 # Einleitung
 
-Das Ziel dieser Ausarbeitung ist einen Anwendungsfall für eine Dokumentendatenbank, im Speziellen MongoDB, aufzuzeigen. Hierzu wurde ein Docker-Container bereitgestellt, welcher Gateways, Ruuvi-Tags und Measurements simuliert. Die Gateways sind dabei als fest verankerte Positionen im Raum anzusehen, während die Tags bewegliche Objekte sind, die zum jeweils nächstgelegenen Gateway eine Verbindung herstellen und die regelmäßig Messungen erzeugen. 
+Das Ziel dieser Ausarbeitung ist einen Anwendungsfall für eine Dokumentendatenbank, im Speziellen MongoDB, aufzuzeigen. Hierzu wurde ein Docker-Container bereitgestellt, welcher Gateways, Ruuvi-Tags und Measurements simuliert. Die Gateways sind dabei als fest verankerte Positionen im Raum anzusehen, während die Tags bewegliche Objekte sind, die zum jeweils nächstgelegenen Gateway eine Verbindung herstellen und die regelmäßig Messungen erzeugen.
 
 Die Ausarbeitung beginnt mit einer allgemeinen Einführung in MongoDB, der Datenbankstruktur und den Funktionen und Nutzen einer Dokumentendatenbank. Anschließend erfolgt die Darstellung eines Anwendungsfalls, welcher als Basis für die weiteren Implementierungssschritte dient. Gefolgt wird der Anwendungsfall von der daraus abgeleiteten Datenbankstruktur und der Python-Applikation, mit der Daten in die Datenbank eingespielt werden. Um im Anschluss aufzuzeigen, wie die Daten aus der Datenbank abgefragt werden, folgt ein allgemeiner Teil zur Datenbankabfrage in MongoDB und spezifische Datenvisualisierungen auf den innerhalb des Projekts in der Datenbank gespeicherten Daten. Abschließend erfolgt ein Fazit mit den Herausforderungen und möglichen Anpassungen an der Implementierung.
 
@@ -97,11 +97,11 @@ Die Besonderheit von MongoDB liegt in der hohen Flexibilität. Das System ermög
 
 Ein weiteres Merkmal von MongoDB ist das BSON-Format (Binary JSON), eine binäre Variante von JSON (JavaScript Object Notation). BSON bietet einen erweiterten Bereich von Datentypen an und ist damit besonders vielseitig.[@PureStorage]
 
-## Datenbankstruktur
+## Struktur von MongoDB
 
 Im Gegensatz zu den üblichen relationalen SQL-Datenbanken arbeitet MongoDB zur Datenspeicherung nicht mit Tabellen und Spalten, sondern mit Collections und Documents.
 
-Documents in MongoDB bestehen aus Wert-Schlüssel-Paaren und bilden die Grundlage für die Datenspeicherung. Darüber hinaus beinhaltet MongoDB Collections, die wiederum diese Documents speichern. Jedes dieser Dokumente ist einzigartig und kann eine beliebige Anzahl von Feldern enthalten. Der Aufbau eines Dokuments wird durch den Aufbau der Klassen und Objekte bestimmt, welche vom Entwickler in der verwendeten Programmiersprache definiert werden. MongoDB unterstützt mehrere Programmiersprachen, wie z. B. C, C++, C#, Java, Python, Ruby und Swift. [@DataScientest]
+Documents in MongoDB bestehen aus Schlüssel-Wert-Paaren und bilden die Grundlage für die Datenspeicherung. Darüber hinaus beinhaltet MongoDB Collections, die wiederum diese Documents speichern. Jedes dieser Dokumente ist einzigartig und kann eine beliebige Anzahl von Feldern enthalten. Der Aufbau eines Dokuments wird durch den Aufbau der Klassen und Objekte bestimmt, welche vom Entwickler in der verwendeten Programmiersprache definiert werden. MongoDB unterstützt mehrere Programmiersprachen, wie z. B. C, C++, C#, Java, Python, Ruby und Swift. [@DataScientest]
 
 ## Funktion und Nutzen
 
@@ -109,7 +109,7 @@ MongoDB bietet Organisationen eine umfangreiche Auswahl an Einsatzmöglichkeiten
 
 **Datenspeicherung:** MongoDB ist hochflexibel und kann sowohl große strukturierte als auch unstrukturierte Datensätze verarbeiten. Die Skalierbarkeit der Datenbank erstreckt sich auf vertikale und horizontale Ebenen. Abfragen können nach Feldern, Bereichen und Ausdrücken erfolgen.
 
-**Komplexe Datenstrukturen**: Mit MongoDB lassen sich komplexe Datenstrukturen darstellen. Das Dokumentenmodell unterstützt die Verschachtelung von Dokumenten, was vor allem bei der Abbildung hierarchischer Strukturen hilfreich sein kann. Darüber hinaus lassen sich mit MongoDB variable Datenstrukturen leicht abbilden.
+**Komplexe Datenstrukturen**: Mit MongoDB lassen sich komplexe Datenstrukturen darstellen. Das Dokumentenmodell unterstützt die Verschachtelung von Dokumenten, was vor allem bei der Abbildung hierarchischer Strukturen hilfreich sein kann. Darüber hinaus lassen sich mit MongoDB variable Datenstrukturen abbilden.
 
 **Lastenausgleich**: MongoDB kann auf mehreren Servern ausgeführt werden, womit eine dynamische Lastverteilung möglich ist. Dadurch wird die Verfügbarkeit der Datenbank erhöht, was vor allem in Umgebungen mit erhöhtem Datenverkehr und hohem Arbeitsaufkommen von Nutzen ist.
 
@@ -121,37 +121,37 @@ Diese Anpassungsfähigkeit und Skalierbarkeit machen MongoDB zu einer idealen L�
 
 # Anwendungsfall
 
-Im Rahmen dieser Projektarbeit werden die von den Ruuvy Tags gelieferten Daten im Umfeld eines Supermarkts betrachtet. Gateways sind dabei über verschiedene Abteilungen (z.B. die Frischfleisch-, Obst- & Gemüse-, Tiefkühl- oder Aktionswarenabteilung) verteilt. Die von den Tags gesendeten Werte werden dabei als Werte der entsprechenden Abteilung gewertet. Die Ruuvy Tags werden an allen Einkaufswagen angebracht. Sie liefern Daten über die Beschleunigung der Einkaufswagen, die Temperatur, Luftfeuchtigkeit und den Luftdruck in der Abteilung sowie den Ladezustand der eigenen Batterie. Die Beschleunigung der Einkaufswagen kann als Indikator für die Bewegung eines Einkaufswagens gewertet werden da Menschen in der Regel nicht in der Lage sind, ein Objekt mit einer genau gleichbleibenden Geschwindigkeit (also ohne Beschleunigung) zu bewegen. Eine Beschleunigung von 0 m/s\^2 bedeutet demnach, dass der Einkaufswagen steht. Zielsetzung im Rahmen dieses Projektes ist es, anhand der Beschleunigungsdaten der Einkaufswägen zu erkennen, welche Abteilungen im Markt viele Kunden anziehen. Dabei wird ein häufiges Beschleunigen innerhalb einer Abteilung eines Wagens als Interesse an mehreren Produkten betrachtet. Gibt es viele verschiedene Tags, die sich in einer Abteilung parallel aufhalten ist diese vermutlich stark frequentiert und von Interesse für die Kunden. Die Produkte müssten entsprechend häufiger nachgefüllt werden. Gibt es bei Aktionspreisen Schwankungen zu einem regulären Verhalten können kurzfristig zudem Aussagen über den Erfolg des Angebotes erhalten werden. Zudem können Informationen darüber, wie schnell ein Tag die Gateways wechselt, für die Planung zeigen, wie lange sich Kunden in den verschiedenen Abteilungen aufhalten. Eine Auswertung anderer Daten des Ruuvy Tags wie die Temperatur wäre denkbar, ist aber nicht Teil dieses Projekts.
+Im Rahmen dieser Projektarbeit werden die von den Ruuvy Tags gelieferten Daten im Umfeld eines Supermarkts betrachtet. Gateways sind dabei über verschiedene Abteilungen (z.B. die Frischfleisch-, Obst- & Gemüse-, Tiefkühl- oder Aktionswarenabteilung) verteilt. Die von den Tags gesendeten Werte werden dabei als Werte der entsprechenden Abteilung gewertet. Die Ruuvy Tags werden an allen Einkaufswagen angebracht. Sie liefern Daten über die Beschleunigung der Einkaufswagen, die Temperatur, Luftfeuchtigkeit und den Luftdruck in der Abteilung sowie den Ladezustand der eigenen Batterie. Die Beschleunigung der Einkaufswagen kann als Indikator für die Bewegung eines Einkaufswagens gewertet werden da Menschen in der Regel nicht in der Lage sind, ein Objekt mit einer genau gleichbleibenden Geschwindigkeit (also ohne Beschleunigung) zu bewegen. Eine Beschleunigung von 0 m/s\^2 bedeutet demnach, dass der Einkaufswagen steht. Zielsetzung im Rahmen dieses Projektes ist es, anhand der Beschleunigungsdaten der Einkaufswägen zu erkennen, welche Abteilungen im Markt viele Kunden anziehen. Dabei wird ein häufiges Beschleunigen innerhalb einer Abteilung eines Wagens als Interesse an mehreren Produkten betrachtet. Gibt es viele verschiedene Tags, die sich in einer Abteilung parallel aufhalten ist diese vermutlich stark frequentiert und von Interesse für die Kunden. Die Produkte müssten entsprechend häufiger nachgefüllt werden. Gibt es bei Aktionspreisen Schwankungen zu einem regulären Verhalten, können kurzfristig zudem Aussagen über den Erfolg des Angebotes erhalten werden. Zudem können Informationen darüber, wie schnell ein Tag die Gateways wechselt, für die Planung zeigen, wie lange sich Kunden in den verschiedenen Abteilungen aufhalten. Eine Auswertung anderer Daten des Ruuvy Tags wie die Temperatur wäre denkbar, ist aber nicht Teil dieses Projekts.
 
 \newpage
 
 # Datenbankstuktur
 
-Um die Datenbank mit MongoDB zu erstellen wurde zunächst der Use Case betrachtet. Im Zentrum der Abfrage stehen dabei immer die Gateways (Abteilungen des Supermarktes). Tags können dabei zwischen den Gateways wechseln und an verschiedenen Tags unterschiedliche Messergebnisse liefern. Aus diesem Grund wurde sich hier für eine Struktur mit vier Tabellen entschieden. Diese sind die Tabellen gateways, tags, measures und configs. In gateways befinden sich Informationen über die einzelnen Gateways (wie beispielsweise die IP Addresse und das Datum der letzten Verbindung). Außerdem beinhaltet diese Tabelle jeweils ein Array, in dem sich die Tag ID's befinden, die ihm zugeordnet sind sowie der eines mit den Config ID's. Sie verweisen als Fremdschlüssel auf die Tabellen tags und configs. Es wurde sich dagegen entschieden, diese Tabellen in Gateways zu embedden. Grund dafür ist die ansteigende Speichergröße. Im Rahmen dieses Projekts wird nur eine kostenlose Version von MongoDB über MongoDB Atlas verwendet. Da das Einbetten der Tabellen deren Größe stark wachsen lässt wurde sich entschieden, auf eine bessere Abfragegeschwindigkeit zugunsten des Speichers zu verzichten. Zusätzlich wird die Tabelle configs verwendet, um sowohl für die Gateways als auch für die Tags unterschiedliche Konfigurationsdaten zu speichern. Diese müsste demnach alternativ in beide Tabellen (gateways und tags) embedded werden. Innerhalb der Tabelle tags befinden sich Informationen über die einzelnen Tags. Dazu zählt die ID, der Name, das Datum der letzten Verbindung, ein Flag, das zu erkennen gibt, ob der Tag online ist sowie die KonfigurationsID. Zuletzt werden die Messwerte der Einkaufswagen mit eigener ID, einem Timestamp und der Tag ID als Fremdschlüssel in measures gespeichert.
+Um die Datenbank mit MongoDB zu erstellen wurde zunächst der Use Case betrachtet. Im Zentrum der Abfrage stehen dabei immer die Gateways (Abteilungen des Supermarktes). Tags können dabei zwischen den Gateways wechseln und an verschiedenen Tags unterschiedliche Messergebnisse liefern. Aus diesem Grund wurde sich hier für eine Struktur mit vier Tabellen entschieden. Diese sind die Tabellen "gateways", "tags", "measures" und "configs". In gateways befinden sich Informationen über die einzelnen Gateways (wie beispielsweise die IP Addresse und das Datum der letzten Verbindung). Außerdem beinhaltet diese Tabelle jeweils ein Array, in dem sich die Tag IDs befinden, die ihm zugeordnet sind sowie der eines mit den Config IDs. Sie verweisen als Fremdschlüssel auf die Tabellen tags und configs. Es wurde sich dagegen entschieden, diese Tabellen in Gateways zu embedden. Grund dafür ist die ansteigende Speichergröße. Im Rahmen dieses Projekts wird nur eine kostenlose Version von MongoDB über MongoDB Atlas verwendet. Da das Einbetten der Tabellen deren Größe stark wachsen lässt wurde sich entschieden, auf eine bessere Abfragegeschwindigkeit zugunsten des Speichers zu verzichten. Zusätzlich wird die Tabelle configs verwendet, um sowohl für die Gateways als auch für die Tags unterschiedliche Konfigurationsdaten zu speichern. Diese müsste demnach alternativ in beide Tabellen (gateways und tags) embedded werden. Innerhalb der Tabelle tags befinden sich Informationen über die einzelnen Tags. Dazu zählt die ID, der Name, das Datum der letzten Verbindung, ein Flag, das zu erkennen gibt, ob der Tag online ist sowie die KonfigurationsID. Zuletzt werden die Messwerte der Einkaufswagen mit eigener ID, einem Timestamp und der Tag ID als Fremdschlüssel in measures gespeichert.
 
 ```{r database, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Datenbankstruktur', out.width='1\\linewidth', fig.pos='H'}
 knitr::include_graphics("./fig/Struktur.jpg")
 ```
 
-Die obere Architektur ermöglicht einfache Top Down Abfragen. Die Gateways sind dabei immer Ziel der Abfragen und können per Query, je nach Bedarf, runter auf Tag- oder Measures Ebene. Beispiele aus dem Use Case für eine Abfrage auf Tag Ebene währe dabei, wie viele Einkaufswagen sich in einer Abteilung befinden. Auf Measures Ebene stände die Frage, wie oft Einkaufswagen innerhalb einer Abteilung beschleunigt werden.
+Die obere Architektur ermöglicht einfache Top-Down Abfragen. Die Gateways sind dabei immer Ziel der Abfragen und können per Query, je nach Bedarf, runter auf Tag- oder Measures-Ebene. Beispiele aus dem Use Case für eine Abfrage auf Tag-Ebene wäre dabei, wie viele Einkaufswagen sich in einer Abteilung befinden. Auf Measures-Ebene stände die Frage, wie oft Einkaufswagen innerhalb einer Abteilung beschleunigt werden.
 
 \newpage
 
 # Python-Applikation
 
-Bevor man ins Tiefe geht, muss folgendes erwähnt werden:
+Bevor man in die Tiefe geht, muss folgendes erwähnt werden:
 
 -   Um sensible Daten zu schützen, wie z.B. Zugangsdaten für eine Datenbank, werden diese in einer separaten Datei gespeichert und per `python-dotenv` package aufgerufen. Dabei kommen solche Funktionen, wie `os.getenv()` oder `os.environ.get()` zur Hilfe.
 
--   Dadurch die Ruuvi-API eine REST-API Architektur nutzt, wurde es entschieden, für GET-Abfragen eine python-Package `requests` zu verwenden.
+-   Da die Ruuvi-API eine REST-API-Architektur nutzt, wurde entschieden, für GET-Anfragen das Python-Paket "requests" zu verwenden.
 
--   Die Applikation wurde als einen Python Module geschrieben, so kann es sehr leich in einen größeren Projekt integriert werden.
+-   Die Anwendung wurde als Python-Modul geschrieben, sodass es problemlos in ein größeres Projekt integriert werden kann.
 
--   Die Daten werden syncron (bzw. sequentiell) in eine MongoDB (shared) Cluster hochgeladen, die eine Speicherbegrenzung von 512 MBs hat, und zwar mithilfe der `pymongo` python-Package.
+-   Die Daten werden synchron (bzw. sequenziell) in eine freigegebene MongoDB-Cluster hochgeladen, der eine Speicherbegrenzung von 512 MB aufweist (mithilfe des Python-Pakets "pymongo").
 
--   Das Neustarten von der Python-Applikation bereinigt die Datenbank mit allen bevor gesammelten Daten.
+-   Beim Neustarten der Python-Anwendung werden alle zuvor gesammelten Daten in der Datenbank gelöscht.
 
-Der ganze Modul besteht aus folgende Python-Dateien:
+Das Modul besteht aus den folgenden Python-Dateien:
 
 **api.py**
 
@@ -159,41 +159,41 @@ Hier werden die ganzen Funktonen definiert, die zur Datenextrahierung aus der AP
 
 Dabei müssen die wichtigsten Annahmen bzw. Methoden zur Datenextrhierung erwähnt werden:
 
-1.  MongoDB kann leider keine Nanosekunden, deswegen werden diese abgeschnitten, um einen String-Timestamp in einen DateTime-Timestamp überführen zu können. Das betrifft Felder "last_contact" bei Tags und Gateways, und "recorded_time" bei Measurements.
+1.  MongoDB unterstützt keine Nanosekunden, deswegen werden diese abgeschnitten, um einen String-Timestamp in einen DateTime-Timestamp überführen zu können. Das betrifft die Felder "last_contact" bei Tags und Gateways, und "recorded_time" bei Measurements.
 
-2.  Bei der Pagination über Measurements muss sichergestellt werden, dass man bei einem Tag nicht x-mal über die gleiche Seite iteriert, dafür müssen die Checkpoints zwichengespeichert werden. Bei der Pagination wird den Progress in die Measurements-Dokumenten mitgeschrieben, was in Zusammenhang mit einer zugehörigen Tag-Adresse eine robuste Methode zur Speicherung der Checkpoints anbietet.
+2.  Bei der Pagination über Measurements muss sichergestellt werden, dass man bei einem Tag nicht x-mal über die gleiche Seite iteriert. Dafür müssen die Checkpoints zwichengespeichert werden. Bei der Pagination wird der Progress in die Measurements-Dokumente hinzugefügt, was in Zusammenhang mit einer zugehörigen Tag-Adresse eine robuste Methode zur Speicherung der Checkpoints anbietet.
 
-3.  Bei der Pagination wird eine Annahme getroffen, dass es unendlich iteriert wird, bis man eine auf eine Seite mit Measurements stößt, wo es weniger als der zugelassene Maximum angezeigt wird (\< 10).
+3.  Bei der Pagination wird eine Annahme getroffen, dass es iteriert wird, bis man das Maximum erreicht (\< 10).
 
 **dataloader.py**
 
-Es wird grundsätzlich eine While-Schleife wird verwendet, um alle historische Änderungen von Gateways und Tags zu tracken.
+Es wird grundsätzlich eine While-Schleife verwendet, um alle historischen Änderungen von Gateways und Tags zu tracken.
 
-1.  Während eines While-Zykles wird zuerst den Endpoint "/structure/gateway/list" abgefragt, so bekommt man eine Liste aus Gateways, die dann weiterverarbeitet werden.
+1.  Während eines While-Zykles wird zuerst das Endpoint "/structure/gateway/list" abgefragt, so bekommt man eine Liste aus Gateways, die dann weiterverarbeitet werden.
 
-2.  Für jeden Gateway wird es iteriert und dabei pro Iteration werden zwei Tasks erledigt, als Erstes wird einen Python Dictionary verformt, der 1 zu 1, wie in der Datenbank-Schema für MongoDB aussieht und als Zweites wird es für jeden gateway ID eine weitere API GET-Abfrage verformt, die eine Liste aus den zugehörigen Tags zurückgibt.
+2.  Es wird eine Iteration für jedes Gateway durchgeführt, wobei pro Iteration zwei Aufgaben erledigt werden. Zunächst wird ein Python-Dictionary erstellt, das genau dem Datenbankschema für MongoDB entspricht. Als Nächstes wird für jede Gateway-ID eine weitere API-GET-Anfrage durchgeführt, um eine Liste der zugehörigen Tags abzurufen.
 
-3.  Es kommt zu einer weiteren For-Scheife für Tags, diese werden dann zuerst für MongoDB Import vorbereitet wie vorher die Gateways. Hier wird werden die Tag-Addressen in eine Liste hinzugefügt, die endlich bei einem Gateway in der MongoDB Collection auftaucht. Bevor den Tag endlich in die Collection gespeichert wird, wird es auf die Funktion `updateInsert()` zugegriffen, um die Dopplungen beim Speichern zu vermeiden.
+3.  Es kommt zu einer weiteren Schleife für Tags. Diese werden zunächst für den Import in MongoDB vorbereitet, ähnlich wie zuvor bei den Gateways. Hier werden die Tag-Adressen einer Liste hinzugefügt, die schließlich in einer MongoDB-Collection unter einem bestimmten Gateway erscheint. Bevor der Tag endgültig in die Collection gespeichert wird, wird die Funktion "updateInsert()" aufgerufen, um doppelte Einträge beim Speichern zu vermeiden.
 
-4.  Dann gibt es die 3. Stufe von der For-Schleife, wobei es eine GET-Abfrage für Measurements zusammengestellt wird. Die zurückgegebenen Measurements werden für die Speicherung in die Datenbank wie vorher vorbereitet und mithilfe von `updateInsert`-Funktionen in die zugehörige Collection gespeichert.
+4.  Dann gibt es die dritte Stufe der Schleife, in der eine GET-Abfrage für Messdaten zusammengestellt wird. Die zurückgegebenen Messwerte werden, ähnlich wie zuvor, für die Speicherung in der Datenbank vorbereitet und mithilfe von "updateInsert"-Funktionen in die entsprechende Collection gespeichert.
 
 **update.py**
 
 Beinhaltet alle Hilfsfunktionen, die mit einer MongoDB-Datebank mithilfe von `pymongo`-Package interragieren.
 
-Die Datei beinhaltet verschiedene Funktionen, die aber folgende Funkionalität am Ende erlauben:
+Die Datei beinhaltet verschiedene Funktionen, die folgende Funkionalitäten erlauben:
 
--   `getLastPageNumber()` -\> gibt eine aktuelle Seitennumer für den jeweiligen Tag Id, der ín die Funktion übergeben wurde. Das wird intern benötigt, um die Pagination über Measurements steuern zu können.
+-   `getLastPageNumber()`: Gibt eine aktuelle Seitennumer für die jeweiligen Tag IDs, die ín die Funktion übergeben wurden. Das wird intern benötigt, um die Pagination über Measurements steuern zu können.
 
--   `checkLastTag()` -\> prüft ob der übergebene Tag von einem vorher gespeicherten Tag in der Collection "Tags" unterscheidet. Falls es der Fall ist, wird dieser in die Datenbank gespeichert, falls es keine Änderung für den Tag gab, wird es verworfen, somit werden Duplikaten vermeidet.
+-   `checkLastTag()`: Prüft ob der übergebene Tag von einem vorher gespeicherten Tag in der Collection "Tags" übereinstimmt oder nicht. Falls es der Fall ist, wird dieser in die Datenbank gespeichert. Falls es keine Änderung für den Tag gab, wird es verworfen. Somit werden Duplikate vermieden.
 
--   `updateInsert()` -\> eine Funktion, die unmitterlbar einen übergebenen Dictionary in eine gegebene Collection speichert.
+-   `updateInsert()`: Eine Funktion, die ein übergebenes Dictionary unmittelbar in eine gegebene Collection speichert.
 
 \newpage
 
 # Datenabfrage
 
-Wie Kommen eigentlich die Daten aus der Datenbank? Um mit MongoDB zu interagieren, haben wir uns sichergestellt, dass die erforderlichen Bibliotheken Pymongo installiert ist. **PyMongo** ist das offizielle Treiber-Paket, um MongoDB mit Python anzusteuern.
+Wie kommen eigentlich die Daten aus der Datenbank? Um mit MongoDB zu interagieren, haben wir sichergestellt, dass die erforderlichen Bibliotheken Pymongo installiert werden. **PyMongo** ist das offizielle Treiber-Paket, um MongoDB mit Python anzusteuern.
 
 ``` python
 import pymongo
@@ -206,7 +206,7 @@ client = pymongo.MongoClient("mongodb://localhost:27017/")
 db = client['MongoDB-Database']
 ```
 
-In MongoDB werden die Daten in sogenannten "Collections" (Sammlungen) organisiert und gespeichert. Eine Collection ist eine Gruppe von Dokumenten, die ähnliche oder verwandte Daten enthalten. In unserem Fall sind es drei Sammlungen
+In MongoDB werden die Daten in sogenannte "Collections" (Sammlungen) gespeichert. Eine Collection ist eine Gruppe von Dokumenten, die ähnliche oder verwandte Daten enthalten. In unserem Fall sind es drei Sammlungen
 
 ``` python
 gateways_collection = db["measures"]
@@ -236,7 +236,7 @@ Sobald wir alle Stages haben, konstruieren und führen wir die Aggregationsabfra
 
 # Datenvisualisierung
 
-Im Rahmen des festgelegten Anwendungsfall wurden 4 zu beantwortende Fragen definiert. Alle 4 Fragen werden mit entsprechenden Abbildungen dargestellt. Der Code zum Erzeugen der Darstellungen und die entsprechenden Datenbankabfragen sind in gleicher Reihenfolge als Anhang im Ordner *src* im Notebook *mongodb_queries.ipynb* zu finden.
+Im Rahmen des festgelegten Anwendungsfall wurden vier zu beantwortende Fragen definiert. Alle vier Fragen werden mit entsprechenden Abbildungen dargestellt. Der Code zum Erzeugen der Darstellungen und die entsprechenden Datenbankabfragen sind in gleicher Reihenfolge als Anhang im Ordner *src* und im Notebook *mongodb_queries.ipynb* zu finden.
 
 Die erste Frage lautet: *In welcher Abteilung halten sich die meisten Kunden auf?* In Bezug auf den Anwendungsfall wurde ausgewertet, wie viele Tags mit einem Gateway zum Stand der letzten Messung verbunden waren. Die Visualisierung ist in der Abbildung \@ref(fig:most-customers) zu finden. Es ist zu erkennen, dass die Tags nicht gleichverteilt mit den Gateways verbunden sind. Insbesondere fällt ein Gateway auf, welches nur mit einem einzigen Tag zum Zeitpunkt der letzten Messung verbunden war.
 
@@ -244,13 +244,13 @@ Die erste Frage lautet: *In welcher Abteilung halten sich die meisten Kunden auf
 knitr::include_graphics("./fig/most_customers_now.pdf")
 ```
 
-Als Filialmarkt ist ebenfalls die Raumgestaltung der Abteilungen interessant. Daher lautet die zweite Frage: *In welchen Abteilungen gibt es die meisten Zusammenstöße mit Regalen?* Im Rahmen der gegebenen Daten wurde eine Beschleunigung in X-Richtung von über 200 $m/s^2$, was etwas mehr als 20G entspricht, als Zusammenstoß festgelegt. Anders als zur Beantwortung der ersten Frage, wurde zur Beantwortung dieser Frage die Visualisierung zusätzlich auf die höchsten 5 Werte entsprechend der Anzahl der relevanten Events eingeschränkt. Die Ergebnisse sind in Abbildung \@ref(fig:most-crashes) dargestellt.
+Als Filialmarkt ist ebenfalls die Raumgestaltung der Abteilungen interessant. Daher lautet die zweite Frage: *In welchen Abteilungen gibt es die meisten Zusammenstöße mit Regalen?* Im Rahmen der gegebenen Daten wurde eine Beschleunigung in X-Richtung von über 200 $m/s^2$, was etwas mehr als 20G entspricht, als Zusammenstoß festgelegt. Anders als zur Beantwortung der ersten Frage, wurde zur Beantwortung dieser Frage die Visualisierung zusätzlich auf die höchsten fünf Werte entsprechend der Anzahl der relevanten Events eingeschränkt. Die Ergebnisse sind in Abbildung \@ref(fig:most-crashes) dargestellt.
 
 ```{r most-crashes, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Zusammenstöße mit Regalen je Abteilung', out.width='1\\linewidth', fig.pos='H'}
 knitr::include_graphics("./fig/most_crashes.pdf")
 ```
 
-Eine weitere wirtschaftliche Frage für einen Filialmarkt ist die Frage nach den *Abteilungen mit dem höchsten Kundeninteresse*. Kundeninteresse bedeutet im Anwendungsfall, dass ein Kunde ein Produkt in einer Abteilung betrachtet und kauft. Der Kunde muss somit Anhalten, ein Produkt betrachten und gegebenenfalls in den Einkaufswagen legen, und im Anschluss Weitergehen. Mit diesem Stoppen und Starten gehen höhere Beschleunigungswerte einher. Da sich die Tags an den Einkaufswagen befinden, wurden die durchschnittlichen Beschleunigungswerte in X-Richtung je Gateway als Näherung für das Kundeninteresse in einer Abteilung gewertet. Es werden in Abbildung \@ref(fig:highest-interest) ebenfalls ausschließlich die 5 höchsten Werte dargestellt.
+Eine weitere wirtschaftliche Frage für einen Filialmarkt ist die Frage nach den *Abteilungen mit dem höchsten Kundeninteresse*. Kundeninteresse bedeutet im Anwendungsfall, dass ein Kunde ein Produkt in einer Abteilung betrachtet und kauft. Der Kunde muss somit Anhalten, ein Produkt betrachten und gegebenenfalls in den Einkaufswagen legen, und im Anschluss Weitergehen. Mit diesem Stoppen und Starten gehen höhere Beschleunigungswerte einher. Da sich die Tags an den Einkaufswagen befinden, wurden die durchschnittlichen Beschleunigungswerte in X-Richtung je Gateway als Näherung für das Kundeninteresse in einer Abteilung gewertet. Es werden in Abbildung \@ref(fig:highest-interest) ebenfalls ausschließlich die fünf höchsten Werte dargestellt.
 
 ```{r highest-interest, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Abteilungen mit dem höchsten Kundeninteresse', out.width='1\\linewidth', fig.pos='H'}
 knitr::include_graphics("./fig/highest_interest.pdf")
@@ -258,7 +258,7 @@ knitr::include_graphics("./fig/highest_interest.pdf")
 
 Wie in der Abbildung \@ref(fig:highest-interest) zu erkennen, hat die Visualisierung leider keine direkte Aussagekraft. Die Datengenerierung wurde daraufhin genauer untersucht und die Darstellung ist dem Datengenerierungs-Schema geschuldet. Es wurden lediglich 200 distinkte Messwerte für den Wert *acc_x* gefunden. Alle Werte kamen dabei gleich häufig vor. Die unterschiedliche Anzahl an Messwerten über 200 $m/s^2$ je Gateway, wie in Abbildung \@ref(fig:most-crashes) dargestellt, stammt lediglich daraus, dass diese Gateways mehr der 200-Messwerte-Zyklen durchlaufen haben. Die Durchschnittswerte sind durch diese Datengenerierung aber für alle Gateways identisch. Eine tiefere Untersuchung der Datengenerierung ist ebenfalls im Notebook *mongodb_queries.ipynb* unter der Überschrift *Untersuchung der Visualisierung von Abfrage 3* zu finden.
 
-Die letzte aufgestellte Frage zur Einschätzung der Abteilungs-Performance lautet: *Wie lange verbringt ein Kunde durchschnittlich in einer Abteilung?* Zu Beantwortung dieser Frage wurde zunächst die Verbindungszeit eines Tags mit einem Gateway berechnet. Im Anschluss wurde aus diesen Ergebnissen die durchschnittliche Verbindungszeit je Gateway ermittelt. Für diese Visualisierung wurden neben den 5 Abteilungen mit dem höchsten Kundeninteresse auch die 5 Abteilungen mit dem niedrigsten Kundeninteresse ausgegeben. Das Ergebnis ist in Darstellung \@ref(fig:avg-time-gateway) zu finden.
+Die letzte aufgestellte Frage zur Einschätzung der Abteilungs-Performance lautet: *Wie lange verbringt ein Kunde durchschnittlich in einer Abteilung?* Zu Beantwortung dieser Frage wurde zunächst die Verbindungszeit eines Tags mit einem Gateway berechnet. Im Anschluss wurde aus diesen Ergebnissen die durchschnittliche Verbindungszeit je Gateway ermittelt. Für diese Visualisierung wurden neben den fünf Abteilungen mit dem höchsten Kundeninteresse auch die fünf Abteilungen mit dem niedrigsten Kundeninteresse ausgegeben. Das Ergebnis ist in Darstellung \@ref(fig:avg-time-gateway) zu finden.
 
 ```{r avg-time-gateway, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Abteilungen mit höchster und niedrigster Durchschnittszeit', out.width='1\\linewidth', fig.pos='H'}
 knitr::include_graphics("./fig/avg_time_gateway.pdf")
@@ -290,7 +290,7 @@ Da die API in der Programmiersprache Go programmiert wurde, werden Timestamps de
 
 ## Lessons Learned and Future Changes
 
-Wie bereits in [Challenges](#historical) erwähnt, änderte sich während der Entwicklung mehrfach der Anwendungsfall oder die Voraussetzungen an das Programm. Dieses zog eine Änderung der Datenbankstruktur, der Validation und der Indexe nach sich. Es sollte für zukünftige Projekte mit dokumentenorientierten Datenbanken bei der Planung der Struktur der Anwendungsfall im Vordergrund stehen und weniger die Daten an sich wie etwa bei relationalen Datenbanken. Daten, die zusammen abgefragt werden, sollten auch zusammen gespeichert werden. Des Weiteren sollte sich bei der Planung genau mit der Art der Daten auseinandergesetzt werden. Im Falle der Messwerte konnte der Vorteil der von MongoDB bereitgestellten Time-Series Collection genutzt werden. Mit dieser Art Collection ließ sich Speicherplatz sparen und ebenfalls die Abfragen beschleunigen. Es ist jedoch wichtig zu erwähnen, dass unser Programm laut [@MongoTimeSeries] hätte beschleunigt werden können, wenn wir von der insert_one Methode in pymongo auf eine Batch Verarbeitung mit insert_many gewechselt wären. Der Vorteil hätte durch die seitenweise Speicherung der Messwerte genutzt werden können.
+Wie bereits in [Challenges](#historical) erwähnt, änderte sich während der Entwicklung mehrfach der Anwendungsfall oder die Voraussetzungen an das Programm. Dieses zog eine Änderung der Datenbankstruktur, der Validation und der Indexe nach sich. Es sollte für zukünftige Projekte mit dokumentenorientierten Datenbanken bei der Planung der Struktur der Anwendungsfall im Vordergrund stehen und weniger die Daten an sich, wie etwa bei relationalen Datenbanken. Daten, die zusammen abgefragt werden, sollten auch zusammen gespeichert werden. Des Weiteren sollte sich bei der Planung genau mit der Art der Daten auseinandergesetzt werden. Im Falle der Messwerte konnte der Vorteil der von MongoDB bereitgestellten Time-Series Collection genutzt werden. Mit dieser Art Collection ließ sich Speicherplatz sparen und ebenfalls die Abfragen beschleunigen. Es ist jedoch wichtig zu erwähnen, dass unser Programm laut [@MongoTimeSeries] hätte beschleunigt werden können, wenn wir von der insert_one Methode in pymongo auf eine Batch-Verarbeitung mit insert_many gewechselt hätten. Der Vorteil hätte durch die seitenweise Speicherung der Messwerte genutzt werden können.
 
 \newpage
 
@@ -313,7 +313,7 @@ Die Datei *dataloader.py* enthält die While-Schleife, mit der die Daten in die 
 \
 **update.py**
 
-Die Datei *update.py* enthält alle Hilfsfunktionen zur Interaktion mit der MongoDB-Datenbank. 
+Die Datei *update.py* enthält alle Hilfsfunktionen zur Interaktion mit der MongoDB-Datenbank.
 
 \newpage
 
@@ -352,8 +352,13 @@ Die Datei *update.py* enthält alle Hilfsfunktionen zur Interaktion mit der Mong
 **Sinan Eker**
 
 -   Auswertungsteil Einführung und Datenbeschreibung
+
 -   Erstellung MongoDB Cloud free Tier und individuelle User
+
 -   Schema-Design Datenbank
+
+-   Formatierung und Korrektur
+
 -   Festlegung Anwendungsfälle
 
 \
