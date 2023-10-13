@@ -4,7 +4,7 @@ abstract: ""
 keywords: "MongoDB, Python"
 
 course: Datenbanken in Big Data (Prof. Dr. Buchwitz)
-supervisor: Marius ...
+supervisor: Marius Scheffel
 city: Meschede
 
 # List of Authors
@@ -304,7 +304,7 @@ Die Datei *api.py* definiert alle Funktionen, die zur Datenextrahierung aus der 
 \
 **dataloader.py**
 
-Die Datei *dataloader.py* enthält die While-Schleife, mit der die Daten in die MongoDB-Datenbank geschrieben werden.
+Die Datei *dataloader.py* enthält die While-Schleife, mit der die Daten in die MongoDB-Datenbank geschrieben werden. Innerhalb dieser Datei findet auch die Strukturanpassung der Gateways, Tags und Measurements statt.
 
 \
 **update.py**
