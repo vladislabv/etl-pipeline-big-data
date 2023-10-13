@@ -113,19 +113,25 @@ Diese Anpassungsfähigkeit und Skalierbarkeit machen MongoDB zu einer idealen L�
 
 ## Datenbeschreibung
 
+\newpage
+
 # Anwendungsfall
 
 Im Rahmen dieser Projektarbeit werden die von den Ruuvy Tags gelieferten Daten im Umfeld eines Supermarkts betrachtet. Gateways sind dabei über verschiedene Abteilungen (z.B. die Frischfleisch-, Obst- & Gemüse-, Tiefkühl- oder Aktionswarenabteilung) verteilt. Die von den Tags gesendeten Werte werden dabei als Werte der entsprechenden Abteilung gewertet. Die Ruuvy Tags werden an allen Einkaufswagen angebracht. Sie liefern Daten über die Beschleunigung der Einkaufswagen, die Temperatur, Luftfeuchtigkeit und den Luftdruck in der Abteilung sowie den Ladezustand der eigenen Batterie. Die Beschleunigung der Einkaufswagen kann als Indikator für die Bewegung eines Einkaufswagens gewertet werden da Menschen in der Regel nicht in der Lage sind, ein Objekt mit einer genau gleichbleibenden Geschwindigkeit (also ohne Beschleunigung) zu bewegen. Eine Beschleunigung von 0 m/s\^2 bedeutet demnach, dass der Einkaufswagen steht. Zielsetzung im Rahmen dieses Projektes ist es, anhand der Beschleunigungsdaten der Einkaufswägen zu erkennen, welche Abteilungen im Markt viele Kunden anziehen. Dabei wird ein häufiges Beschleunigen innerhalb einer Abteilung eines Wagens als Interesse an mehreren Produkten betrachtet. Gibt es viele verschiedene Tags, die sich in einer Abteilung parallel aufhalten ist diese vermutlich stark frequentiert und von Interesse für die Kunden. Die Produkte müssten entsprechend häufiger nachgefüllt werden. Gibt es bei Aktionspreisen Schwankungen zu einem regulären Verhalten können kurzfristig zudem Aussagen über den Erfolg des Angebotes erhalten werden. Zudem können Informationen darüber, wie schnell ein Tag die Gateways wechselt, für die Planung zeigen, wie lange sich Kunden in den verschiedenen Abteilungen aufhalten. Eine Auswertung anderer Daten des Ruuvy Tags wie die Temperatur wäre denkbar, ist aber nicht Teil dieses Projekts.
 
+\newpage
+
 # Datenbankstuktur
 
-Um die Datenbank mit MongoDB zu erstellen wurde zunächst der Use Case betrachtet. Im Zentrum der Abfrage stehen dabei immer die Gateways (Abteilungen des Supermarktes). Tags können dabei zwischen den Gateways wechseln und an verschiedenen Tags unterschiedliche Messergebnisse liefern. Aus diesem Grund wurde sich hier für eine Struktur mit vier Tabellen entschieden. Diese sind die Tabellen gateways, tags, measures und configs. In gateways befinden sich Informationen über die einzelnen Gateways (wie beispielsweise die IP Addresse und das Datum der letzten Verbindung). Außerdem beinhaltet diese Tabelle jeweils ein Array, in dem sich die Tag ID's befinden, die ihm zugeordnet sind sowie der eines mit den Config ID's. Sie verweisen als Fremdschlüssel auf die Tabellen tags und configs. Es wurde sich dagegen entschieden, diese Tabellen in Gateways zu embedden. Grund dafür ist die ansteigende Speichergröße. Im Rahmen dieses Projekts wird nur eine kostenlose Version von MongoDB über MongoDB Atlas verwendet. Da das Einbetten der Tabellen deren Größe stark wachsen lässt wurde sich entschieden, auf eine bessere Abfragegeschwindigkeit zugunsten des Speichers zu verzichten. Anders vervahren wird hier mit den Kondifurationen. Sie werden in den entsprechenden Gateways und Tags embedded da hier eine häufige Änderung unwahrscheinlich und die Größe überschaubarer ist. Innerhalb der Tabelle tags befinden sich zudem Informationen über die einzelnen Tags. Dazu zählt die ID, der Name, das Datum der letzten Verbindung, ein Flag, das zu erkennen gibt, ob der Tag online ist sowie die KonfigurationsID. Zuletzt werden die Messwerte der Einkaufswagen mit eigener ID, einem Timestamp und der Tag ID als Fremdschlüssel in measures gespeichert.
+Um die Datenbank mit MongoDB zu erstellen wurde zunächst der Use Case betrachtet. Im Zentrum der Abfrage stehen dabei immer die Gateways (Abteilungen des Supermarktes). Tags können dabei zwischen den Gateways wechseln und an verschiedenen Tags unterschiedliche Messergebnisse liefern. Aus diesem Grund wurde sich hier für eine Struktur mit vier Tabellen entschieden. Diese sind die Tabellen gateways, tags, measures und configs. In gateways befinden sich Informationen über die einzelnen Gateways (wie beispielsweise die IP Addresse und das Datum der letzten Verbindung). Außerdem beinhaltet diese Tabelle jeweils ein Array, in dem sich die Tag ID's befinden, die ihm zugeordnet sind sowie der eines mit den Config ID's. Sie verweisen als Fremdschlüssel auf die Tabellen tags und configs. Es wurde sich dagegen entschieden, diese Tabellen in Gateways zu embedden. Grund dafür ist die ansteigende Speichergröße. Im Rahmen dieses Projekts wird nur eine kostenlose Version von MongoDB über MongoDB Atlas verwendet. Da das Einbetten der Tabellen deren Größe stark wachsen lässt wurde sich entschieden, auf eine bessere Abfragegeschwindigkeit zugunsten des Speichers zu verzichten. Zusätzlich wird die Tabelle configs verwendet, um sowohl für die Gateways als auch für die Tags unterschiedliche Konfigurationsdaten zu speichern. Diese müsste demnach alternativ in beide Tabellen (gateways und tags) embedded werden. Innerhalb der Tabelle tags befinden sich Informationen über die einzelnen Tags. Dazu zählt die ID, der Name, das Datum der letzten Verbindung, ein Flag, das zu erkennen gibt, ob der Tag online ist sowie die KonfigurationsID. Zuletzt werden die Messwerte der Einkaufswagen mit eigener ID, einem Timestamp und der Tag ID als Fremdschlüssel in measures gespeichert.
 
 ```{r database, echo = FALSE, message=FALSE, fig.align='center', fig.cap='Datenbankstruktur', out.width='1\\linewidth', fig.pos='H'}
 knitr::include_graphics("./fig/Struktur.jpg")
 ```
 
 Die obere Architektur ermöglicht einfache Top Down Abfragen. Die Gateways sind dabei immer Ziel der Abfragen und können per Query, je nach Bedarf, runter auf Tag- oder Measures Ebene. Beispiele aus dem Use Case für eine Abfrage auf Tag Ebene währe dabei, wie viele Einkaufswagen sich in einer Abteilung befinden. Auf Measures Ebene stände die Frage, wie oft Einkaufswagen innerhalb einer Abteilung beschleunigt werden.
+
+\newpage
 
 # Python-Applikation
 
@@ -178,6 +184,8 @@ Die Datei beinhaltet verschiedene Funktionen, die aber folgende Funkionalität a
 -   `checkLastTag()` -\> prüft ob der übergebene Tag von einem vorher gespeicherten Tag in der Collection "Tags" unterscheidet. Falls es der Fall ist, wird dieser in die Datenbank gespeichert, falls es keine Änderung für den Tag gab, wird es verworfen, somit werden Duplikaten vermeidet.
 
 -   `updateInsert()` -\> eine Funktion, die unmitterlbar einen übergebenen Dictionary in eine gegebene Collection speichert.
+
+\newpage
 
 # Datenabfrage
 
@@ -286,13 +294,22 @@ Wie bereits in [Challenges](#historical) erwähnt, änderte sich während der En
 
 **mongodb_queries.ipynb**
 
-Dieses Jupyter Notebook enthält die Abfragen zu den entsprechenden Abfrage-Visualisierungen sowie aufgrund der Darstellung \@ref(fig:highest-interest) und \@ref(fig:avg-time-gateway) eine Untersuchung der Datengenerierung.
+Das Jupyter Notebook *mongodb_queries.ipynb* enthält die Abfragen zu den entsprechenden Abfrage-Visualisierungen sowie aufgrund der Darstellung \@ref(fig:highest-interest) und \@ref(fig:avg-time-gateway) eine Untersuchung der Datengenerierung.
 
+\
 **api.py**
 
+Die Datei *api.py* definiert alle Funktionen, die zur Datenextrahierung aus der API genutzt werden.
+
+\
 **dataloader.py**
 
+Die Datei *dataloader.py* enthält die While-Schleife, mit der die Daten in die MongoDB-Datenbank geschrieben werden.
+
+\
 **update.py**
+
+Die Datei *update.py* enthält alle Hilfsfunktionen zur Interaktion mit der MongoDB-Datenbank. 
 
 \newpage
 
@@ -346,6 +363,7 @@ Dieses Jupyter Notebook enthält die Abfragen zu den entsprechenden Abfrage-Visu
 **Patrick Adrian Ulbrich**
 
 -   Auswertungsteil Datenvisualisierung
+-   Auswertungsteil Appendix
 -   Anhang mongodb_queries.ipynb
 -   Schema-Design Datenbank
 -   Festlegung Anwendungsfälle
