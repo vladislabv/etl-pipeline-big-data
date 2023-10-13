@@ -149,7 +149,6 @@ Bevor man in die Tiefe geht, muss folgendes erwähnt werden:
 
 -   Die Daten werden synchron (bzw. sequenziell) in eine freigegebene MongoDB-Cluster hochgeladen, der eine Speicherbegrenzung von 512 MB aufweist (mithilfe des Python-Pakets "pymongo").
 
--   Beim Neustarten der Python-Anwendung werden alle zuvor gesammelten Daten in der Datenbank gelöscht.
 
 Das Modul besteht aus den folgenden Python-Dateien:
 
@@ -163,7 +162,7 @@ Dabei müssen die wichtigsten Annahmen bzw. Methoden zur Datenextrhierung erwäh
 
 2.  Bei der Pagination über Measurements muss sichergestellt werden, dass man bei einem Tag nicht x-mal über die gleiche Seite iteriert. Dafür müssen die Checkpoints zwichengespeichert werden. Bei der Pagination wird der Progress in die Measurements-Dokumente hinzugefügt, was in Zusammenhang mit einer zugehörigen Tag-Adresse eine robuste Methode zur Speicherung der Checkpoints anbietet.
 
-3.  Bei der Pagination wird eine Annahme getroffen, dass es iteriert wird, bis man das Maximum erreicht (\< 10).
+3.  Bei der Pagination wird eine Annahme getroffen, dass iteriert wird, bis man das bis die next_page gleich der page ist oder die maximale Anzahl von 50 Zeichen pro Tag importiert wurde.
 
 **dataloader.py**
 
@@ -352,13 +351,9 @@ Die Datei *update.py* enthält alle Hilfsfunktionen zur Interaktion mit der Mong
 **Sinan Eker**
 
 -   Auswertungsteil Einführung und Datenbeschreibung
-
 -   Erstellung MongoDB Cloud free Tier und individuelle User
-
 -   Schema-Design Datenbank
-
 -   Formatierung und Korrektur
-
 -   Festlegung Anwendungsfälle
 
 \

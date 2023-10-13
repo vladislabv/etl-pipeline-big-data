@@ -15,7 +15,7 @@ HEADERS = {'accept': 'application/json'}
 # open session
 with requests.Session() as s:
     # delete all previously collected data from the database, i.e. new start - new life :)
-    deleteMeasurements()
+    # deleteMeasurements()
     
     # set request headers
     s.headers.update(HEADERS)
