@@ -83,6 +83,12 @@ library(ggplot2)
 
 # Einleitung
 
+Das Ziel dieser Ausarbeitung ist einen Anwendungsfall für eine Dokumentendatenbank, im Speziellen MongoDB, aufzuzeigen. Hierzu wurde ein Docker-Container bereitgestellt, welcher Gateways, Ruuvi-Tags und Measurements simuliert. Die Gateways sind dabei als fest verankerte Positionen im Raum anzusehen, während die Tags bewegliche Objekte sind, die zum jeweils nächstgelegenen Gateway eine Verbindung herstellen und die regelmäßig Messungen erzeugen. 
+
+Die Ausarbeitung beginnt mit einer allgemeinen Einführung in MongoDB, der Datenbankstruktur und den Funktionen und Nutzen einer Dokumentendatenbank. Anschließend erfolgt die Darstellung eines Anwendungsfalls, welcher als Basis für die weiteren Implementierungssschritte dient. Gefolgt wird der Anwendungsfall von der daraus abgeleiteten Datenbankstruktur und der Python-Applikation, mit der Daten in die Datenbank eingespielt werden. Um im Anschluss aufzuzeigen, wie die Daten aus der Datenbank abgefragt werden, folgt ein allgemeiner Teil zur Datenbankabfrage in MongoDB und spezifische Datenvisualisierungen auf den innerhalb des Projekts in der Datenbank gespeicherten Daten. Abschließend erfolgt ein Fazit mit den Herausforderungen und möglichen Anpassungen an der Implementierung.
+
+\newpage
+
 # Einführung in MongoDB
 
 MongoDB ist eine Open-Source-NoSQL-Datenbank, die auf nichtrelationalen Prinzipien aufbaut. Diese Datenbank ist flexibel und kann sowohl strukturierte, als auch unstrukturierte Daten verarbeiten. Sie ist dokumentenorientiert und in einer unstrukturierten Query Language implementiert.
@@ -360,8 +366,7 @@ Die Datei *update.py* enthält alle Hilfsfunktionen zur Interaktion mit der Mong
 \
 **Patrick Adrian Ulbrich**
 
--   Auswertungsteil Datenvisualisierung
--   Auswertungsteil Appendix
+-   Auswertungsteil Einleitung, Datenvisualisierung, Appendix
 -   Anhang mongodb_queries.ipynb
 -   Schema-Design Datenbank
 -   Festlegung Anwendungsfälle
